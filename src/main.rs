@@ -1,7 +1,6 @@
-extern crate elf;
-
-use std::path::PathBuf;
 use std::env;
+
+mod loader;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -9,7 +8,6 @@ fn main() {
         2 => (),
         _ => panic!("Usage: \"cargo run $BINARY\"")
     }
-    let path = PathBuf::from(&args[1]);
-    let file = elf::File::open_path(&path).expect("Invalid given executable");
+    loader::elf::init::init(&args[1]);
     println!("Hello, world!");
 }
