@@ -11,11 +11,5 @@ pub fn init(file: &String) {
         elf::types::EM_386 => (),
         _ => panic!("Invalid target architecture")
     }
-    match binobj.ehdr.machine {
-        elf::types::EM_X86_64 => (),
-        elf::types::EM_AARCH64 => (),
-        elf::types::EM_386 => (),
-        _ => panic!("Invalid target architecture")
-    }
     println!("tkt le couz");
 }
