@@ -11,5 +11,5 @@ pub fn init(file: &String) {
         elf::types::EM_386 => (),
         _ => panic!("Invalid target architecture")
     }
-    println!("tkt le couz");
+    println!("elf initialized");
 }
