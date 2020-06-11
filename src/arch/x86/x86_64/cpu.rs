@@ -2,11 +2,17 @@
 #![allow(unused_must_use)]
 #![allow(dead_code)]
 
-type reg64 = u64;
-type reg32 = u32;
-type reg16 = u16;
-type reg8  = u8;
+/*
+ * Some registers types
+*/
+pub type reg64 = u64;
+pub type reg32 = u32;
+pub type reg16 = u16;
+pub type reg8  = u8;
 
+/*
+ * Struct describing a minimal x64 processor for userspace utilization
+*/
 pub struct X64UserProc {
     rax: reg64,
     rdi: reg64,
@@ -30,6 +36,9 @@ pub struct X64UserProc {
     rip: reg64,
 }
 
+/*
+ * x64 Register list
+*/
 #[derive(Debug, Clone, Copy)]
 pub enum UserRegister {
     rax,
@@ -51,6 +60,9 @@ pub enum UserRegister {
     rip,
 }
 
+/*
+ * Unused Error handling at time 
+*/
 pub enum ProcError {
     InvalidRegister,
 }
@@ -58,6 +70,9 @@ pub enum ProcError {
 pub type ProcResult<T> = Result<T, ProcError>;
 
 impl X64UserProc {
+    /*
+     * Create a x64 processor
+    */
     pub fn new() -> X64UserProc {
         X64UserProc {
             rax: 0x0,
@@ -80,6 +95,9 @@ impl X64UserProc {
         }
     }
 
+    /*
+     * Get register and returning his value
+    */ 
     pub fn get64_register(&self, reg: UserRegister) -> ProcResult<reg64> {
         Ok (match reg {
             UserRegister::rax => self.rax,
@@ -117,6 +135,9 @@ impl X64UserProc {
         Ok(res as reg8)
     }
 
+    /*
+     * Set the register with given value
+    */
     pub fn set64_register(&mut self, reg: UserRegister, val: reg64) -> ProcResult<()> {
         match reg {
             UserRegister::rax => self.rax = val,
@@ -164,6 +185,14 @@ impl X64UserProc {
 
 // static mut stack: [u8; 0x100000] = [0; 0x100000];
 
-pub fn init() {
-
+/*
+ * supervisor init processor
+*/
+pub fn init(stack: reg64, entry: reg64) -> X64UserProc {
+    let mut new = X64UserProc::new();
+    new.rbp = stack;
+    new.rsp = stack;
+    new.rip = entry;
+    println!("x64 Processor initialized");
+    new
 }

@@ -9,7 +9,7 @@ fn main() {
         2 => (),
         _ => panic!("Usage: \"cargo run $BINARY\"")
     }
-    loader::elf::init::init(&args[1]);
-    arch::x86::x86_64::cpu::init();
+    loader::elf::init::elfimg::new(&args[1]);
+    // arch::x86::x86_64::cpu::init(0, 0);
     println!("Hello, world!");
 }
