@@ -1,16 +1,26 @@
+#![allow(dead_code)]
+
 extern crate elf;
 extern crate libc;
 
 use std::path::PathBuf;
 
 #[derive(Debug)]
-pub struct elfimg {
+pub struct ElfImg {
     img: *mut libc::c_void,
     bin: elf::File,
 }
 
-impl elfimg {
-    pub fn new(file: &String) -> elfimg {
+pub enum ElfError {
+    InvalidSymName,
+    InvalidSymAddr,
+    InvalidSec,
+}
+
+pub type ElfResult<T> = Result<T, ElfError>;
+
+impl ElfImg {
+    pub fn new(file: &String) -> ElfImg {
         let path = PathBuf::from(file);
         let binobj = elf::File::open_path(&path).expect("Invalid given executable");
         match binobj.ehdr.machine {
@@ -29,16 +39,24 @@ impl elfimg {
         let ptr = unsafe {
             let ptr: *mut libc::c_void = libc::malloc(max as usize) as *mut libc::c_void;
             if ptr.is_null() {
-                panic!("failed to allocate memory");
+                panic!("failed to allocate memory for processus image, require minimal size: {}", max);
             }
-            libc::free(ptr as *mut libc::c_void);
             ptr
         };
         println!("elf parser initialized");
-        elfimg {
+        ElfImg {
             img: ptr,
             bin: binobj,
         }
     }
 
+    pub fn exit(&mut self) {
+        unsafe { 
+            libc::free(self.img);
+        }
+    }
+
+    // pub fn initImage(&mut self) {}
+    // pub fn SymAddrFromName(&self) {}
+    // pub fn SymNameFromAddr(&self) {}
 }
