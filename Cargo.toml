@@ -8,6 +8,6 @@ edition = "2018"
 
 [dependencies]
 elf = "0.0.10"
-lazy_static = "1.2.0"
+goblin = "0.2.3"
 libc = "0.2.71"
 # burst = "0.0.1"

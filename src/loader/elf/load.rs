@@ -2,8 +2,11 @@
 
 extern crate elf;
 extern crate libc;
+extern crate goblin;
 
 use std::path::PathBuf;
+
+use crate::arch;
 
 use std::io::prelude::*;
 use std::fs::File;
@@ -22,6 +25,8 @@ pub enum ElfError {
     FataFileOp,
     FataMeMIO,
 }
+
+const EHDR_SIZE: usize = 64;
 
 pub type ElfResult<T> = Result<T, ElfError>;
 
@@ -76,11 +81,11 @@ impl ElfImg {
     fn load_static_hdrs(&mut self, vec: &Vec<u8>) {
         let wr = self.img as *mut u8;
         unsafe {
-            for i in 0..64 {
+            for i in 0..EHDR_SIZE {
                 std::ptr::write(wr.wrapping_add(i), vec[i]);
             }
         }
-        println!("phdrs: {}", self.bin.sections.len());
+        arch::x86::x86_64::load::load_phdrs(self.img, vec, 64, self.bin.sections.len())
         // wr = wr.wrapping_add(self.bin)
     }
 
