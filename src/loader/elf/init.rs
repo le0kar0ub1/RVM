@@ -13,7 +13,7 @@ use std::io::SeekFrom;
 #[derive(Debug)]
 pub struct ElfImg {
     file: String,
-    img: *mut libc::c_void,
+    img: *mut u8,
     bin: elf::File,
 }
 
@@ -22,6 +22,7 @@ pub enum ElfError {
     InvalidSymAddr,
     InvalidSec,
     FataFileOp,
+    FataMeMIO,
 }
 
 pub type ElfResult<T> = Result<T, ElfError>;
@@ -44,7 +45,7 @@ impl ElfImg {
             }
         }
         let ptr = unsafe {
-            let ptr: *mut libc::c_void = libc::malloc(max as usize) as *mut libc::c_void;
+            let ptr: *mut u8 = libc::malloc(max as usize) as *mut u8;
             if ptr.is_null() {
                 panic!("failed to allocate memory for processus image, require minimal size: {}", max);
             }
@@ -60,7 +61,7 @@ impl ElfImg {
 
     pub fn exit(&mut self) {
         unsafe { 
-            libc::free(self.img);
+            libc::free(self.img as *mut libc::c_void);
         }
     }
 
@@ -71,12 +72,22 @@ impl ElfImg {
         return Ok(data);
     }
 
+    fn write_image_ehdr(&mut self, vec: &Vec<u8>) {
+        let wr = self.img as *mut u8;
+        unsafe {
+            /* EHDR */
+            for i in 0..64 {
+                std::ptr::write(wr.wrapping_add(i), vec[i]);
+            }
+        }    
+    }
+
     pub fn load(&mut self) -> ElfResult<()> {
         let mut buffer = match ElfImg::read_whole_file(&self.file) {
             Err(_err) => return Err(ElfError::FataFileOp),
             Ok(ok) => ok,
         };
-        println!("{:?}", buffer[0]);
+        self.write_image_ehdr(&buffer);
         Ok(())
     }
 
