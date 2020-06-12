@@ -1,50 +1,54 @@
 #![allow(dead_code)]
 
-extern crate elf;
 extern crate libc;
 extern crate goblin;
-
-use std::path::PathBuf;
 
 use crate::arch;
 
 use std::io::prelude::*;
 use std::fs::File;
 
+use std::rc::Rc;
+
 #[derive(Debug)]
-pub struct ElfImg {
+pub struct ElfImg<'lt> {
     file: String,
     img: *mut u8,
-    bin: elf::File,
+    bin: goblin::elf::Elf<'lt>,
 }
 
 pub enum ElfError {
     InvalidSymName,
     InvalidSymAddr,
     InvalidSec,
-    FataFileOp,
-    FataMeMIO,
+    FatalFileOp,
+    FatalMemIO,
 }
 
 const EHDR_SIZE: usize = 64;
 
 pub type ElfResult<T> = Result<T, ElfError>;
 
-impl ElfImg {
-    pub fn new(file: &String) -> ElfImg {
-        let path = PathBuf::from(file);
-        let binobj = elf::File::open_path(&path).expect("Invalid given executable");
-        match binobj.ehdr.machine {
-            elf::types::EM_X86_64 => (),
-            // elf::types::EM_386 => (),
-            // elf::types::EM_AARCH64 => (),
+impl <'lt>ElfImg<'lt> {
+    pub fn new(file: &String) -> ElfImg<'lt> {
+        let path = std::path::Path::new(file);
+        let buf = std::fs::read(path).expect("Invalid given executable");
+        let binobj = match goblin::elf::Elf::parse(&buf) {
+            Ok(parsed) => parsed,
+            Err(_e) => panic!("Elf parser failed")
+        };
+        println!("{:?}", binobj.program_headers);
+        match binobj.header.e_machine {
+            goblin::elf::header::EM_X86_64 => (),
+            goblin::elf::header::EM_386 => (),
+            goblin::elf::header::EM_AARCH64 => (),
             _ => panic!("Invalid target architecture")
         }
 
         let mut max: u64 = 0;
-        for phdr in &binobj.phdrs {
-            if max < phdr.vaddr + phdr.memsz {
-                max = phdr.vaddr + phdr.memsz;
+        for phdr in &binobj.program_headers {
+            if max < phdr.p_vaddr + phdr.p_memsz {
+                max = phdr.p_vaddr + phdr.p_memsz;
             }
         }
         let ptr = unsafe {
@@ -57,7 +61,7 @@ impl ElfImg {
         println!("elf parser initialized");
         ElfImg {
             file: file.clone(),
-            img: ptr,
+            img: ptr.clone(),
             bin: binobj,
         }
     }
@@ -85,13 +89,13 @@ impl ElfImg {
                 std::ptr::write(wr.wrapping_add(i), vec[i]);
             }
         }
-        arch::x86::x86_64::load::load_phdrs(self.img, vec, 64, self.bin.sections.len())
+        // arch::x86::x86_64::load::load_phdrs(self.img, vec, 64, self.bin.sections.len())
         // wr = wr.wrapping_add(self.bin)
     }
 
     pub fn load(&mut self) -> ElfResult<()> {
         let buffer = match ElfImg::read_whole_file(&self.file) {
-            Err(_err) => return Err(ElfError::FataFileOp),
+            Err(_err) => return Err(ElfError::FatalFileOp),
             Ok(ok) => ok,
         };
         self.load_static_hdrs(&buffer);
