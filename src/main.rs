@@ -9,7 +9,7 @@ fn main() {
         2 => (),
         _ => panic!("Usage: \"cargo run $BINARY\"")
     }
-    let mut elfimg = loader::elf::init::ElfImg::new(&args[1]);
+    let mut elfimg = loader::elf::load::ElfImg::new(&args[1]);
     match elfimg.load() {
         Err(_e) => panic!("Fata error while loading image"),
         Ok(_o) => ()

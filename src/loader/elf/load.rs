@@ -5,10 +5,8 @@ extern crate libc;
 
 use std::path::PathBuf;
 
-use std::io;
 use std::io::prelude::*;
 use std::fs::File;
-use std::io::SeekFrom;
 
 #[derive(Debug)]
 pub struct ElfImg {
@@ -59,7 +57,7 @@ impl ElfImg {
         }
     }
 
-    pub fn exit(&mut self) {
+    pub fn destroy(&mut self) {
         unsafe { 
             libc::free(self.img as *mut libc::c_void);
         }
@@ -72,22 +70,26 @@ impl ElfImg {
         return Ok(data);
     }
 
-    fn write_image_ehdr(&mut self, vec: &Vec<u8>) {
+    /* 
+     * Write EHDR/PHDR/SHDR into image
+    */
+    fn load_static_hdrs(&mut self, vec: &Vec<u8>) {
         let wr = self.img as *mut u8;
         unsafe {
-            /* EHDR */
             for i in 0..64 {
                 std::ptr::write(wr.wrapping_add(i), vec[i]);
             }
-        }    
+        }
+        println!("phdrs: {}", self.bin.sections.len());
+        // wr = wr.wrapping_add(self.bin)
     }
 
     pub fn load(&mut self) -> ElfResult<()> {
-        let mut buffer = match ElfImg::read_whole_file(&self.file) {
+        let buffer = match ElfImg::read_whole_file(&self.file) {
             Err(_err) => return Err(ElfError::FataFileOp),
             Ok(ok) => ok,
         };
-        self.write_image_ehdr(&buffer);
+        self.load_static_hdrs(&buffer);
         Ok(())
     }
 
