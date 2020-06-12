@@ -12,7 +12,82 @@ pub type reg16  = u16;
 pub type reg8   = u8;
 
 /*
- * Struct describing a minimal  processor for userspace utilization
+ *  Register list
+*/
+#[derive(Debug, Clone, Copy)]
+pub enum Register {
+    RAX,
+    RBX,
+    RCX,
+    RDX,
+    RSI,
+    RDI,
+    RBP,
+    RSP,
+    R8,
+    R9,
+    R10,
+    R11,
+    R12,
+    R13,
+    R14,
+    R15,
+    RIP,
+    RFL,
+    CPL,
+    ES,
+    CS,
+    SS,
+    DS,
+    FS,
+    GS,
+    LDT,
+    TR,
+    GDT, 
+    IDT,
+    CR0,
+    CR2,
+    CR3,
+    CR4,
+    DR0,
+    DR1,
+    DR2,
+    DR3,
+    DR6,
+    DR7,
+    EFER,
+    FCW,
+    FSW,
+    FTW,
+    MXCSR,
+    FPR0,
+    FPR1,
+    FPR2,
+    FPR3,
+    FPR4,
+    FPR5,
+    FPR6,
+    FPR7,
+    XMM00,
+    XMM01,
+    XMM02,
+    XMM03,
+    XMM04,
+    XMM05,
+    XMM06,
+    XMM07,
+    XMM08,
+    XMM09,
+    XMM10,
+    XMM11,
+    XMM12,
+    XMM13,
+    XMM14,
+    XMM15,
+}
+
+/*
+ * Struct describing the x64 processor
 */
 pub struct Proc {
     rax: reg64,
@@ -88,95 +163,18 @@ pub struct Proc {
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u8)]
 enum RegisterSize {
-    RegSz8   = 0b000,
-    RegSz16  = 0b001,
-    RegSz32  = 0b010,
-    RegSz64  = 0b011,
-    RegSz128 = 0b100,
+    RegSz16  = 0b00,
+    RegSz32  = 0b01,
+    RegSz64  = 0b10,
+    RegSz128 = 0b11,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 #[repr(u8)]
 enum RegisterAccess {
-    RegSys  = 0b0,
-    RegUser = 0b1,
+    RegSys = 0b0,
+    RegUsr = 0b1,
 }
-
-/*
- *  Register list
-*/
-#[derive(Debug, Clone, Copy)]
-pub enum Register {
-    RAX,
-    RBX,
-    RCX,
-    RDX,
-    RSI,
-    RDI,
-    RBP,
-    RSP,
-    R8,
-    R9,
-    R10,
-    R11,
-    R12,
-    R13,
-    R14,
-    R15,
-    RIP,
-    RFL,
-    CPL,
-    ES,
-    CS,
-    SS,
-    DS,
-    FS,
-    GS,
-    LDT,
-    TR,
-    GDT, 
-    IDT,
-    CR0,
-    CR2,
-    CR3,
-    CR4,
-    DR0,
-    DR1,
-    DR2,
-    DR3,
-    DR6,
-    DR7,
-    EFER,
-    FCW,
-    FSW,
-    FTW,
-    MXCSR,
-    FPR0,
-    FPR1,
-    FPR2,
-    FPR3,
-    FPR4,
-    FPR5,
-    FPR6,
-    FPR7,
-    XMM00,
-    XMM01,
-    XMM02,
-    XMM03,
-    XMM04,
-    XMM05,
-    XMM06,
-    XMM07,
-    XMM08,
-    XMM09,
-    XMM10,
-    XMM11,
-    XMM12,
-    XMM13,
-    XMM14,
-    XMM15,
-}
-
 
 /*
  * Unused Error handling at time 
@@ -189,7 +187,7 @@ pub type ProcResult<T> = Result<T, ProcError>;
 
 impl Proc {
     /*
-     * Create a  processor
+     * Create a processor
     */
     pub fn new() -> Proc {
         Proc {

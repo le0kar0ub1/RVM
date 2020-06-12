@@ -9,7 +9,11 @@ fn main() {
         2 => (),
         _ => panic!("Usage: \"cargo run $BINARY\"")
     }
-    let elfimg = loader::elf::init::ElfImg::new(&args[1]);
-    // arch::x86::x86_64::cpu::init(0, 0);
+    let mut elfimg = loader::elf::init::ElfImg::new(&args[1]);
+    match elfimg.load() {
+        Err(_e) => panic!("Fata error while loading image"),
+        Ok(_o) => ()
+    }
+    // let proc = arch::x86::x86_64::cpu::init(0, 0);
     println!("Hello, world!");
 }
