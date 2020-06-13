@@ -8,13 +8,13 @@ use crate::arch;
 use std::io::prelude::*;
 use std::fs::File;
 
-use std::rc::Rc;
+use anyhow::Result;
 
 #[derive(Debug)]
-pub struct ElfImg<'lt> {
+pub struct ElfImg {
     file: String,
     img: *mut u8,
-    bin: goblin::elf::Elf<'lt>,
+    buf: Vec<u8>,
 }
 
 pub enum ElfError {
@@ -29,28 +29,24 @@ const EHDR_SIZE: usize = 64;
 
 pub type ElfResult<T> = Result<T, ElfError>;
 
-impl <'lt>ElfImg<'lt> {
-    pub fn new(file: &String) -> ElfImg<'lt> {
+impl ElfImg {
+    pub fn new(file: &String) -> Result<ElfImg> {
         let path = std::path::Path::new(file);
-        let buf = std::fs::read(path).expect("Invalid given executable");
-        let binobj = match goblin::elf::Elf::parse(&buf) {
-            Ok(parsed) => parsed,
-            Err(_e) => panic!("Elf parser failed")
-        };
-        println!("{:?}", binobj.program_headers);
+        let buf = std::fs::read(path)?;
+        let binobj = goblin::elf::Elf::parse(&buf)?;
         match binobj.header.e_machine {
             goblin::elf::header::EM_X86_64 => (),
             goblin::elf::header::EM_386 => (),
             goblin::elf::header::EM_AARCH64 => (),
             _ => panic!("Invalid target architecture")
         }
-
         let mut max: u64 = 0;
         for phdr in &binobj.program_headers {
             if max < phdr.p_vaddr + phdr.p_memsz {
                 max = phdr.p_vaddr + phdr.p_memsz;
             }
         }
+        max = (max + (1024 - 1)) & !(1024 - 1);
         let ptr = unsafe {
             let ptr: *mut u8 = libc::malloc(max as usize) as *mut u8;
             if ptr.is_null() {
@@ -59,11 +55,11 @@ impl <'lt>ElfImg<'lt> {
             ptr
         };
         println!("elf parser initialized");
-        ElfImg {
+        Ok (ElfImg {
             file: file.clone(),
-            img: ptr.clone(),
-            bin: binobj,
-        }
+            img: ptr,
+            buf: buf,
+        })
     }
 
     pub fn destroy(&mut self) {
@@ -89,15 +85,12 @@ impl <'lt>ElfImg<'lt> {
                 std::ptr::write(wr.wrapping_add(i), vec[i]);
             }
         }
-        // arch::x86::x86_64::load::load_phdrs(self.img, vec, 64, self.bin.sections.len())
+        arch::x86::x86_64::load::load_phdrs(self.img, vec, 64, self.bin.sections.len())
         // wr = wr.wrapping_add(self.bin)
     }
 
-    pub fn load(&mut self) -> ElfResult<()> {
-        let buffer = match ElfImg::read_whole_file(&self.file) {
-            Err(_err) => return Err(ElfError::FatalFileOp),
-            Ok(ok) => ok,
-        };
+    pub fn load(&mut self) -> Result<()> {
+        let buffer = ElfImg::read_whole_file(&self.file)?;
         self.load_static_hdrs(&buffer);
         Ok(())
     }

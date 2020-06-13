@@ -9,4 +9,4 @@ edition = "2018"
 [dependencies]
 goblin = "0.2.3"
 libc = "0.2.71"
-# burst = "0.0.1"
+anyhow = "1.0.31"
