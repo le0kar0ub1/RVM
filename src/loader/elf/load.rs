@@ -3,7 +3,7 @@
 extern crate libc;
 extern crate goblin;
 
-use crate::arch;
+// use crate::arch;
 
 use std::io::prelude::*;
 use std::fs::File;
@@ -14,6 +14,7 @@ use anyhow::{Context, Result};
 pub struct ElfImg {
     file: String,
     img: *mut u8,
+    imgsz: usize,
     buf: Vec<u8>,
 }
 
@@ -38,10 +39,10 @@ impl ElfImg {
             goblin::elf::header::EM_AARCH64 => (),
             _ => panic!("Invalid target architecture")
         }
-        let mut max: u64 = 0;
+        let mut max: usize = 0;
         for phdr in &binobj.program_headers {
-            if max < phdr.p_vaddr + phdr.p_memsz {
-                max = phdr.p_vaddr + phdr.p_memsz;
+            if max < (phdr.p_vaddr + phdr.p_memsz) as usize{
+                max = (phdr.p_vaddr + phdr.p_memsz) as usize;
             }
         }
         max = (max + (1024 - 1)) & !(1024 - 1);
@@ -56,6 +57,7 @@ impl ElfImg {
         Ok (ElfImg {
             file: file.clone(),
             img: ptr,
+            imgsz: max,
             buf: buf,
         })
     }
@@ -63,6 +65,21 @@ impl ElfImg {
     pub fn destroy(&mut self) {
         unsafe { 
             libc::free(self.img as *mut libc::c_void);
+        }
+    }
+
+    #[allow(non_snake_case)]
+    fn ToReallocOrNoToRealloc(&mut self, new: usize) {
+        if new > self.imgsz {
+            let ptr = unsafe {
+                let ptr: *mut u8 = libc::realloc(self.img as *mut libc::c_void, new) as *mut u8;
+                if ptr.is_null() {
+                    panic!("failed to allocate memory for processus image, require minimal size: {}", new);
+                }
+                ptr
+            };
+            self.img = ptr;
+            self.imgsz = new;
         }
     }
 
@@ -77,21 +94,35 @@ impl ElfImg {
      * Write EHDR/PHDR/SHDR into image
     */
     fn load_static_hdrs(&mut self) -> Result<()> {
-        let binobj = goblin::elf::Elf::parse(&self.buf)?;
-        let wr = self.img as *mut u8;
+        let bufcp = &self.buf.clone();
+        let binobj = goblin::elf::Elf::parse(bufcp)?;
+        let ehdr = self.img as *mut u8;
         unsafe {
             for i in 0..(binobj.header.e_ehsize as usize) {
-                std::ptr::write(wr.wrapping_add(i), self.buf[i]);
+                std::ptr::write(ehdr.wrapping_add(i), self.buf[i]);
             }
         }
-        // arch::x86::x86_64::load::load_phdrs(self.img, vec, 64, self.bin.sections.len());
+        self.ToReallocOrNoToRealloc((binobj.header.e_phoff as usize) + (binobj.header.e_phentsize * binobj.header.e_phnum) as usize);
+        let phdr = self.img.wrapping_add(binobj.header.e_phoff as usize);
+        unsafe {
+            for i in 0..((binobj.header.e_phentsize * binobj.header.e_phnum) as usize) {
+                std::ptr::write(phdr.wrapping_add(i), self.buf[i]);
+            }
+        }
+        self.ToReallocOrNoToRealloc((binobj.header.e_shoff as usize) + (binobj.header.e_shentsize * binobj.header.e_shnum) as usize);
+        let shdr = self.img.wrapping_add(binobj.header.e_shoff as usize);
+        unsafe {
+            for i in 0..((binobj.header.e_shentsize * binobj.header.e_shnum) as usize) {
+                std::ptr::write(shdr.wrapping_add(i), self.buf[i]);
+            }
+        }
         // wr = wr.wrapping_add(self.bin)
         Ok(())
     }
 
     pub fn load(&mut self) -> Result<()> {
         // let buffer = ElfImg::read_whole_file(&self.file)?;
-        let binobj = goblin::elf::Elf::parse(&self.buf)?;
+        // let binobj = goblin::elf::Elf::parse(&self.buf)?;
         self.load_static_hdrs()?;
         Ok(())
     }
