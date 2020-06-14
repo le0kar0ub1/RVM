@@ -8,7 +8,7 @@ use crate::arch;
 use std::io::prelude::*;
 use std::fs::File;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 
 #[derive(Debug)]
 pub struct ElfImg {
@@ -25,15 +25,13 @@ pub enum ElfError {
     FatalMemIO,
 }
 
-const EHDR_SIZE: usize = 64;
-
 pub type ElfResult<T> = Result<T, ElfError>;
 
 impl ElfImg {
     pub fn new(file: &String) -> Result<ElfImg> {
         let path = std::path::Path::new(file);
-        let buf = std::fs::read(path)?;
-        let binobj = goblin::elf::Elf::parse(&buf)?;
+        let buf = std::fs::read(path).with_context(|| format!("Failed to read the given path: {:?}", path))?;
+        let binobj = goblin::elf::Elf::parse(&buf).with_context(|| "Invalid ELF format")?;
         match binobj.header.e_machine {
             goblin::elf::header::EM_X86_64 => (),
             goblin::elf::header::EM_386 => (),
@@ -78,20 +76,23 @@ impl ElfImg {
     /* 
      * Write EHDR/PHDR/SHDR into image
     */
-    fn load_static_hdrs(&mut self, vec: &Vec<u8>) {
+    fn load_static_hdrs(&mut self) -> Result<()> {
+        let binobj = goblin::elf::Elf::parse(&self.buf)?;
         let wr = self.img as *mut u8;
         unsafe {
-            for i in 0..EHDR_SIZE {
-                std::ptr::write(wr.wrapping_add(i), vec[i]);
+            for i in 0..(binobj.header.e_ehsize as usize) {
+                std::ptr::write(wr.wrapping_add(i), self.buf[i]);
             }
         }
-        arch::x86::x86_64::load::load_phdrs(self.img, vec, 64, self.bin.sections.len())
+        // arch::x86::x86_64::load::load_phdrs(self.img, vec, 64, self.bin.sections.len());
         // wr = wr.wrapping_add(self.bin)
+        Ok(())
     }
 
     pub fn load(&mut self) -> Result<()> {
-        let buffer = ElfImg::read_whole_file(&self.file)?;
-        self.load_static_hdrs(&buffer);
+        // let buffer = ElfImg::read_whole_file(&self.file)?;
+        let binobj = goblin::elf::Elf::parse(&self.buf)?;
+        self.load_static_hdrs()?;
         Ok(())
     }
 
