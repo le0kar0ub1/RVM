@@ -4,6 +4,8 @@ A simple rust 'virtual machine'.
 
 In fact, this is just a userspace program execution.
 
+[root documentation](doc/root.md)
+
 ## Dependencies
 
 * cargo

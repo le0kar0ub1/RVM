@@ -26,6 +26,15 @@ pub enum ElfError {
     FatalMemIO,
 }
 
+
+#[allow(unused_macros)]
+macro_rules! log {
+    ($expression:expr) => {
+        println!("[ELFIMG]: {}", $expression);
+    };
+}
+
+
 pub type ElfResult<T> = Result<T, ElfError>;
 
 impl ElfImg {
@@ -53,7 +62,7 @@ impl ElfImg {
             }
             ptr
         };
-        println!("elf parser initialized");
+        log!("parser initialized");
         Ok (ElfImg {
             file: file.clone(),
             img: ptr,
@@ -117,6 +126,15 @@ impl ElfImg {
             }
         }
         Ok(())
+    }
+
+    /*
+     * Get section content from name
+    */
+    fn section_get_from_name(binobj: &goblin::elf::Elf) {
+        // let strtab = binobj.ehdr.;
+        for shdr in &binobj.section_headers {
+        }
     }
 
     /*
