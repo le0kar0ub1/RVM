@@ -18,6 +18,7 @@ pub struct ElfImg {
     buf: Vec<u8>,
 }
 
+#[derive(Debug)]
 pub enum ElfError {
     InvalidSymName,
     InvalidSymAddr,
@@ -34,10 +35,18 @@ macro_rules! log {
     };
 }
 
+enum SectionRequest {
+    Addr,
+    Name,
+    Size,
+}
 
 pub type ElfResult<T> = Result<T, ElfError>;
 
 impl ElfImg {
+    /*
+     * Create a new instance of ELF image
+    */
     pub fn new(file: &String) -> Result<ElfImg> {
         let path = std::path::Path::new(file);
         let buf = std::fs::read(path).with_context(|| format!("Failed to read the given path: {:?}", path))?;
@@ -71,12 +80,18 @@ impl ElfImg {
         })
     }
 
+    /*
+     * Free ou process image when terminated
+    */
     pub fn destroy(&mut self) {
         unsafe { 
             libc::free(self.img as *mut libc::c_void);
         }
     }
 
+    /*
+     * Take the new writing space and realloc if necessary
+    */
     #[allow(non_snake_case)]
     fn ToReallocOrNoToRealloc(&mut self, new: usize) {
         if new > self.imgsz {
@@ -92,6 +107,9 @@ impl ElfImg {
         }
     }
 
+    /*
+     * Read whole file then return a u8 vector buffered
+    */
     fn read_whole_file(file: &String) -> std::io::Result<Vec<u8>> {
         let mut file = File::open(file)?;
         let mut data = Vec::new();
@@ -131,14 +149,36 @@ impl ElfImg {
     /*
      * Get section content from name
     */
-    fn section_get_from_name(binobj: &goblin::elf::Elf) {
-        // let strtab = binobj.ehdr.;
+    fn section_get_from_name(&mut self, binobj: &goblin::elf::Elf, sec: String, req: SectionRequest) -> Result<usize> {
+        let shdrtab = binobj.section_headers[binobj.header.e_shstrndx as usize].sh_offset;
         for shdr in &binobj.section_headers {
+            // let mut vec: Vec<char> = Vec::new();
+            // let pt = (self.buf.as_ptr() as u64 + shdrtab + shdr.sh_name as u64) as *mut u8;
+            // let mut i = 0;
+            // unsafe {
+            //     loop {
+            //         let t = std::ptr::read(pt.wrapping_add(i));
+            //         if t == 0 { break; }
+            //         i += 1;
+            //         vec.push(t as char);
+            //     }
+            // }
+            // println!("{:?} {:?}", vec.into_iter().map(|i| i.to_string()).collect::<String>(), sec);
+            unsafe {
+                if libc::strncmp((self.buf.as_ptr() as u64 + shdrtab + shdr.sh_name as u64) as *const i8, sec.as_ptr() as *const i8, sec.len()) == 0 {
+                    match req {
+                        SectionRequest::Addr => return Ok(shdr.sh_addr as usize),
+                        SectionRequest::Name => return Ok((shdrtab + shdr.sh_name as u64) as usize),
+                        SectionRequest::Size => return Ok(shdr.sh_size as usize),
+                    };
+                }
+            }
         }
+        Err(anyhow::anyhow!("Invalid section"))
     }
 
     /*
-     * Load section at their address
+     * Load section at their respective addr
     */
     fn load_sections(&mut self, binobj: &goblin::elf::Elf) -> Result<()> {
         for shdr in &binobj.section_headers {
@@ -159,8 +199,9 @@ impl ElfImg {
     /*
      * Load resolve reloc & load dynamic libraries
     */
-    fn load_resolve_dynamic(&mut self) -> Result<()> {
-
+    fn load_resolve_dynamic(&mut self, binobj: &goblin::elf::Elf) -> Result<()> {
+        let sec = self.section_get_from_name(binobj, ".text".to_string(), SectionRequest::Name)?;
+        println!("SEC: {}", sec);
         Ok(())
     }
 
@@ -184,7 +225,7 @@ impl ElfImg {
         let binobj = goblin::elf::Elf::parse(bufcp)?;
         self.load_static_hdrs(&binobj)?;
         self.load_sections(&binobj)?;
-        self.load_resolve_dynamic()?;
+        self.load_resolve_dynamic(&binobj)?;
 
         self.dump_image()?;
 
