@@ -39,7 +39,7 @@ pub enum ElfError {
 #[allow(unused_macros)]
 macro_rules! log {
     ($expression:expr) => {
-        println!("[ELFTOOL]: {}", $expression);
+        println!("[LOADER]: {}.", $expression);
     };
 }
 
@@ -145,7 +145,7 @@ impl ElfImg {
     }
 
     /*
-     * Get section content from name
+     * Get section index from name
     */
     fn section_get_index_from_name(&mut self, binobj: &goblin::elf::Elf, sec: &mut String) -> Result<usize> {
         let shdrtab = binobj.section_headers[binobj.header.e_shstrndx as usize].sh_offset;
@@ -183,18 +183,19 @@ impl ElfImg {
     }
 
     /*
-     * Load a SO
+     * Load a SO, for now, we don't load recursively, IT'S ABSOLUTELY NEEDED
     */
     fn load_so(&mut self, sof: &str) -> Result<usize> {
         let sop = &format!("{}{}", DYNAMIC_LIBRARY_PATH_LINUX, sof);
         let path = std::path::Path::new(&sop);
         let buf = std::fs::read(path).with_context(|| format!("SO load: Failed to read the given path: {:?}", path))?;
-        // let soobj = goblin::elf::Elf::parse(&buf).with_context(|| format!("SO load: Invalid ELF format: {:?}", path))?;
+        let soobj = goblin::elf::Elf::parse(&buf).with_context(|| format!("SO load: Invalid ELF format: {:?}", path))?;
         let load = self.imgsz;
         self.ToReallocOrNoToRealloc(self.imgsz + buf.len());
         unsafe {
             libc::memcpy(self.img.wrapping_add(load) as *mut libc::c_void, buf.as_ptr() as *const libc::c_void, buf.len());
         }
+        log!(format!("Loading SO {} at address {:#X}", sop, load));
         Ok(load)
     }
 
@@ -204,12 +205,26 @@ impl ElfImg {
     fn load_resolve_dynamic(&mut self, binobj: &goblin::elf::Elf) -> Result<()> {
         let dynamic = &binobj.dynamic;
         let dynstr  = &binobj.dynstrtab;
-        let mut vecstr: Vec<&str>  = Vec::new();
-        let mut vecload: Vec<usize> = Vec::new();
+        let relaplt = &binobj.pltrelocs.to_vec();
+        let dynrel  = &binobj.dynrelas;
+        let mut sovecstr: Vec<&str>   = Vec::new();
+        let mut sovecload: Vec<usize> = Vec::new();
+        /* host all sym relocs we have to do */
+        let mut dynsymvec: Vec<goblin::elf::reloc::Reloc> = Vec::new();
+        for rela in dynrel {
+            if rela.r_sym != 0 {
+                dynsymvec.push(rela);
+            }
+        }
+        for rel in relaplt {
+            dynsymvec.push(*rel);
+            // println!("{:?}", &dynstr[binobj.dynsyms.to_vec()[rel.r_sym].st_name]);
+        }
+        println!("{:?}", dynsymvec);
         for get in &dynamic.as_ref().unwrap().dyns {
             if get.d_tag == 1 {
-                vecstr.push(&dynstr[get.d_val as usize]);
-                vecload.push(self.load_so(&dynstr[get.d_val as usize])?);
+                sovecstr.push(&dynstr[get.d_val as usize]);
+                sovecload.push(self.load_so(&dynstr[get.d_val as usize])?);
             }
         }
         Ok(())
@@ -228,17 +243,18 @@ impl ElfImg {
     }
 
     /*
-     * from binary to image
+     * from binary to image then return the entry point
     */
-    pub fn load(&mut self) -> Result<()> {
+    pub fn load(&mut self) -> Result<usize> {
         let bufcp = &self.buf.clone();
         let binobj = goblin::elf::Elf::parse(bufcp)?;
+        println!("{:?}", binobj.header);
         self.load_static_hdrs(&binobj)?;
         self.load_sections(&binobj)?;
         self.load_resolve_dynamic(&binobj)?;
         self.dump_image()?;
-        log!("Process image loaded");
-        Ok(())
+        log!(format!("Process image loaded: size -> {:#X} | addr -> {:#X}", self.imgsz, self.img as usize));
+        Ok(binobj.header.e_entry as usize)
     }
 
     // pub fn SymAddrFromName(&self) {}
