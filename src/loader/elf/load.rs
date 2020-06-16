@@ -1,5 +1,11 @@
 #![allow(dead_code)]
 
+/*
+ * A lot of unsafe block in this code part.
+ * The problem is that we can't use rust collections to achieve. The data must be fully raw.
+ * Bad usage of the language.
+*/
+
 extern crate libc;
 extern crate goblin;
 
@@ -9,6 +15,8 @@ use std::io::prelude::*;
 use std::fs::File;
 
 use anyhow::{Context, Result};
+
+const DYNAMIC_LIBRARY_PATH_LINUX: &str = "/usr/lib/";
 
 #[derive(Debug)]
 pub struct ElfImg {
@@ -31,43 +39,33 @@ pub enum ElfError {
 #[allow(unused_macros)]
 macro_rules! log {
     ($expression:expr) => {
-        println!("[ELFIMG]: {}", $expression);
+        println!("[ELFTOOL]: {}", $expression);
     };
-}
-
-enum SectionRequest {
-    Addr,
-    Name,
-    Size,
 }
 
 pub type ElfResult<T> = Result<T, ElfError>;
 
 impl ElfImg {
     /*
-     * Create a new instance of ELF image
+     * Create a new instance ELF image
     */
     pub fn new(file: &String) -> Result<ElfImg> {
         let path = std::path::Path::new(file);
         let buf = std::fs::read(path).with_context(|| format!("Failed to read the given path: {:?}", path))?;
-        let binobj = goblin::elf::Elf::parse(&buf).with_context(|| "Invalid ELF format")?;
+        let binobj = goblin::elf::Elf::parse(&buf).with_context(|| format!("Invalid ELF format: {:?}", path))?;
         match binobj.header.e_machine {
             goblin::elf::header::EM_X86_64 => (),
             goblin::elf::header::EM_386 => (),
             goblin::elf::header::EM_AARCH64 => (),
             _ => panic!("Invalid target architecture")
         }
-        let mut max: usize = 0;
-        for phdr in &binobj.program_headers {
-            if max < (phdr.p_vaddr + phdr.p_memsz) as usize{
-                max = (phdr.p_vaddr + phdr.p_memsz) as usize;
-            }
-        }
-        max = (max + (1024 - 1)) & !(1024 - 1);
+        /*
+         * Juste init with a first alloc
+        */
         let ptr = unsafe {
-            let ptr: *mut u8 = libc::calloc(max as usize, 1) as *mut u8;
+            let ptr: *mut u8 = libc::calloc(0x100, 1) as *mut u8;
             if ptr.is_null() {
-                panic!("failed to allocate memory for processus image, require minimal size: {}", max);
+                panic!("failed to allocate memory for processus image, require minimal size: {}", 0x100);
             }
             ptr
         };
@@ -75,13 +73,13 @@ impl ElfImg {
         Ok (ElfImg {
             file: file.clone(),
             img: ptr,
-            imgsz: max,
+            imgsz: 0x40,
             buf: buf,
         })
     }
 
     /*
-     * Free ou process image when terminated
+     * Free our process image when terminated
     */
     pub fn destroy(&mut self) {
         unsafe { 
@@ -114,7 +112,7 @@ impl ElfImg {
         let mut file = File::open(file)?;
         let mut data = Vec::new();
         file.read_to_end(&mut data)?;
-        return Ok(data);
+        Ok(data)
     }
 
     /* 
@@ -149,32 +147,20 @@ impl ElfImg {
     /*
      * Get section content from name
     */
-    fn section_get_from_name(&mut self, binobj: &goblin::elf::Elf, sec: String, req: SectionRequest) -> Result<usize> {
+    fn section_get_index_from_name(&mut self, binobj: &goblin::elf::Elf, sec: &mut String) -> Result<usize> {
         let shdrtab = binobj.section_headers[binobj.header.e_shstrndx as usize].sh_offset;
-        for shdr in &binobj.section_headers {
-            // let mut vec: Vec<char> = Vec::new();
-            // let pt = (self.buf.as_ptr() as u64 + shdrtab + shdr.sh_name as u64) as *mut u8;
-            // let mut i = 0;
-            // unsafe {
-            //     loop {
-            //         let t = std::ptr::read(pt.wrapping_add(i));
-            //         if t == 0 { break; }
-            //         i += 1;
-            //         vec.push(t as char);
-            //     }
-            // }
-            // println!("{:?} {:?}", vec.into_iter().map(|i| i.to_string()).collect::<String>(), sec);
+        sec.push(0x0 as char);
+        for idx in 0..binobj.section_headers.len() {
             unsafe {
-                if libc::strncmp((self.buf.as_ptr() as u64 + shdrtab + shdr.sh_name as u64) as *const i8, sec.as_ptr() as *const i8, sec.len()) == 0 {
-                    match req {
-                        SectionRequest::Addr => return Ok(shdr.sh_addr as usize),
-                        SectionRequest::Name => return Ok((shdrtab + shdr.sh_name as u64) as usize),
-                        SectionRequest::Size => return Ok(shdr.sh_size as usize),
-                    };
+                if libc::strcmp(
+                            (self.buf.as_ptr() as u64 + shdrtab + binobj.section_headers[idx].sh_name as u64) as *const i8,
+                            sec.as_ptr() as *const i8
+                        ) == 0 {
+                    return Ok(idx)
                 }
             }
         }
-        Err(anyhow::anyhow!("Invalid section"))
+        Err(anyhow::anyhow!("Invalid section requested"))
     }
 
     /*
@@ -197,11 +183,35 @@ impl ElfImg {
     }
 
     /*
+     * Load a SO
+    */
+    fn load_so(&mut self, sof: &str) -> Result<usize> {
+        let sop = &format!("{}{}", DYNAMIC_LIBRARY_PATH_LINUX, sof);
+        let path = std::path::Path::new(&sop);
+        let buf = std::fs::read(path).with_context(|| format!("SO load: Failed to read the given path: {:?}", path))?;
+        // let soobj = goblin::elf::Elf::parse(&buf).with_context(|| format!("SO load: Invalid ELF format: {:?}", path))?;
+        let load = self.imgsz;
+        self.ToReallocOrNoToRealloc(self.imgsz + buf.len());
+        unsafe {
+            libc::memcpy(self.img.wrapping_add(load) as *mut libc::c_void, buf.as_ptr() as *const libc::c_void, buf.len());
+        }
+        Ok(load)
+    }
+
+    /*
      * Load resolve reloc & load dynamic libraries
     */
     fn load_resolve_dynamic(&mut self, binobj: &goblin::elf::Elf) -> Result<()> {
-        let sec = self.section_get_from_name(binobj, ".text".to_string(), SectionRequest::Name)?;
-        println!("SEC: {}", sec);
+        let dynamic = &binobj.dynamic;
+        let dynstr  = &binobj.dynstrtab;
+        let mut vecstr: Vec<&str>  = Vec::new();
+        let mut vecload: Vec<usize> = Vec::new();
+        for get in &dynamic.as_ref().unwrap().dyns {
+            if get.d_tag == 1 {
+                vecstr.push(&dynstr[get.d_val as usize]);
+                vecload.push(self.load_so(&dynstr[get.d_val as usize])?);
+            }
+        }
         Ok(())
     }
 
@@ -226,9 +236,8 @@ impl ElfImg {
         self.load_static_hdrs(&binobj)?;
         self.load_sections(&binobj)?;
         self.load_resolve_dynamic(&binobj)?;
-
         self.dump_image()?;
-
+        log!("Process image loaded");
         Ok(())
     }
 
