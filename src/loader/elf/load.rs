@@ -73,7 +73,7 @@ impl ElfImg {
         Ok (ElfImg {
             file: file.clone(),
             img: ptr,
-            imgsz: 0x40,
+            imgsz: 0x100,
             buf: buf,
         })
     }
@@ -127,7 +127,8 @@ impl ElfImg {
                 std::ptr::write(ehdr.wrapping_add(i), self.buf[i]);
             }
         }
-        self.ToReallocOrNoToRealloc((binobj.header.e_phoff as usize) + (binobj.header.e_phentsize * binobj.header.e_phnum) as usize)?;
+        self.ToReallocOrNoToRealloc((binobj.header.e_phoff as usize) +
+                                    (binobj.header.e_phentsize * binobj.header.e_phnum) as usize)?;
         let phdr = self.img.wrapping_add(binobj.header.e_phoff as usize);
         let add = binobj.header.e_phoff as usize;
         unsafe {
@@ -135,7 +136,8 @@ impl ElfImg {
                 std::ptr::write(phdr.wrapping_add(i), self.buf[i + add]);
             }
         }
-        self.ToReallocOrNoToRealloc((binobj.header.e_shoff as usize) + (binobj.header.e_shentsize * binobj.header.e_shnum) as usize)?;
+        self.ToReallocOrNoToRealloc((binobj.header.e_shoff as usize) +
+                                    (binobj.header.e_shentsize * binobj.header.e_shnum) as usize)?;
         let shdr = self.img.wrapping_add(binobj.header.e_shoff as usize);
         let add = binobj.header.e_shoff as usize;
         unsafe {
@@ -149,7 +151,9 @@ impl ElfImg {
     /*
      * Get section index from name
     */
-    fn section_get_index_from_name(&mut self, binobj: &goblin::elf::Elf, sec: &mut String) -> Result<usize> {
+    fn section_get_index_from_name(&mut self,
+                                   binobj: &goblin::elf::Elf,
+                                   sec: &mut String) -> Result<usize> {
         let shdrtab = binobj.section_headers[binobj.header.e_shstrndx as usize].sh_offset;
         sec.push(0x0 as char);
         for idx in 0..binobj.section_headers.len() {
@@ -185,9 +189,44 @@ impl ElfImg {
     }
 
     /*
-     * Load a SO, for now, we don't load recursively, IT'S ABSOLUTELY NEEDED
+     * replace the given reloc by the given address
     */
-    fn load_so(&mut self, sof: &str) -> Result<usize> {
+    fn load_replace_reloc_addr(&mut self, addr: usize, reloc: goblin::elf::reloc::Reloc) {
+        let wr = (self.img as usize + reloc.r_offset as usize) as *mut usize;
+        unsafe {
+            std::ptr::write(wr, addr);
+        }
+    }
+
+    /*
+     * Resolve all relocations of 1 SO already loaded
+    */
+    fn load_resolve_relocs(&mut self, soobj: &goblin::elf::Elf,
+                           dynsymvec: &Vec<goblin::elf::reloc::Reloc>,
+                           dynsymname: &Vec<&str>,
+                           load: usize) -> Result<()> {
+        let syms = &soobj.syms;
+        let strtab = &soobj.strtab;
+        /* loop over symbol we must resolve */
+        'sym: for i in 0..dynsymname.len() {
+            /* loop over all symbols contained in the SO */
+            for sym in syms {
+                if dynsymname[i] == &strtab[sym.st_name] && sym.st_value != 0x0 {
+                    let real = (sym.st_value + load as u64) as usize;
+                    self.load_replace_reloc_addr(real, dynsymvec[i]);
+                    continue 'sym;
+                }
+            }
+        }
+        Ok(())
+    }
+
+    /*
+     * Load a Shared Object
+    */
+    fn load_so(&mut self, sof: &str,
+               dynsymvec: &Vec<goblin::elf::reloc::Reloc>,
+               dynsymname: &Vec<&str>) -> Result<usize> {
         let sop = &format!("{}{}", DYNAMIC_LIBRARY_PATH_LINUX, sof);
         let path = std::path::Path::new(&sop);
         let buf = std::fs::read(path).with_context(|| format!("Failed to read the given path: {:?}", path))?;
@@ -197,7 +236,9 @@ impl ElfImg {
         unsafe {
             libc::memcpy(self.img.wrapping_add(load) as *mut libc::c_void, buf.as_ptr() as *const libc::c_void, buf.len());
         }
-        log!(format!("Loading SO {} at address {:#X}", sop, load));
+        log!(format!("Loading SO {} at offset {:#X}", sop, load));
+        /* resolve relocations */
+        self.load_resolve_relocs(&soobj, dynsymvec, dynsymname, load)?;
         Ok(load)
     }
 
@@ -209,24 +250,28 @@ impl ElfImg {
         let dynstr  = &binobj.dynstrtab;
         let relaplt = &binobj.pltrelocs.to_vec();
         let dynrel  = &binobj.dynrelas;
+        /* host all SO name & load addr */
         let mut sovecstr: Vec<&str>   = Vec::new();
         let mut sovecload: Vec<usize> = Vec::new();
         /* host all sym relocs we have to do */
         let mut dynsymvec: Vec<goblin::elf::reloc::Reloc> = Vec::new();
+        let mut dynsymname: Vec<&str> = Vec::new();
+        /* Get all relocs we have to resolve */
         for rela in dynrel {
             if rela.r_sym != 0 {
                 dynsymvec.push(rela);
+                dynsymname.push(&dynstr[binobj.dynsyms.to_vec()[rela.r_sym].st_name]);
             }
         }
         for rel in relaplt {
             dynsymvec.push(*rel);
-            // println!("{:?}", &dynstr[binobj.dynsyms.to_vec()[rel.r_sym].st_name]);
+            dynsymname.push(&dynstr[binobj.dynsyms.to_vec()[rel.r_sym].st_name]);
         }
-        println!("{:?}", dynsymvec);
+        /* Load shared library */
         for get in &dynamic.as_ref().unwrap().dyns {
             if get.d_tag == 1 {
                 sovecstr.push(&dynstr[get.d_val as usize]);
-                sovecload.push(self.load_so(&dynstr[get.d_val as usize])?);
+                sovecload.push(self.load_so(&dynstr[get.d_val as usize], &dynsymvec, &dynsymname)?);
             }
         }
         Ok(())
