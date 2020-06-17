@@ -5,6 +5,7 @@ use burst;
 
 mod loader;
 mod arch;
+mod mem;
 
 fn launch(file: &String) -> Result<()> {
     let mut elfimg = loader::elf::load::ElfImg::new(file)?;
