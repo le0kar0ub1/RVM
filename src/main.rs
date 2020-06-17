@@ -14,6 +14,7 @@ fn launch(file: &String) -> Result<()> {
     let get = unsafe { 
         std::slice::from_raw_parts((ep + 4) as *const u8, 16)
     };
+    let mem = mem::mem::Mem::new(0x10000);
     println!("{:#X?}", get);
     let instr = burst::x86::disassemble_64(&get, 0, 16);
     println!("{:?}", instr);
