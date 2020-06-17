@@ -57,7 +57,7 @@ impl ElfImg {
             goblin::elf::header::EM_X86_64 => (),
             goblin::elf::header::EM_386 => (),
             goblin::elf::header::EM_AARCH64 => (),
-            _ => panic!("Invalid target architecture")
+            _ => return Err(anyhow::anyhow!("Invalid target architecture")),
         }
         /*
          * Juste init with a first alloc
@@ -65,7 +65,7 @@ impl ElfImg {
         let ptr = unsafe {
             let ptr: *mut u8 = libc::calloc(0x100, 1) as *mut u8;
             if ptr.is_null() {
-                panic!("failed to allocate memory for processus image, require minimal size: {}", 0x100);
+                return Err(anyhow::anyhow!(format!("failed to allocate memory for processus image, require minimal size: {}", 0x100)));
             }
             ptr
         };
@@ -91,18 +91,19 @@ impl ElfImg {
      * Take the new writing space and realloc if necessary
     */
     #[allow(non_snake_case)]
-    fn ToReallocOrNoToRealloc(&mut self, new: usize) {
+    fn ToReallocOrNoToRealloc(&mut self, new: usize) -> Result<()> {
         if new > self.imgsz {
             let ptr = unsafe {
                 let ptr: *mut u8 = libc::realloc(self.img as *mut libc::c_void, new) as *mut u8;
                 if ptr.is_null() {
-                    panic!("failed to allocate memory for processus image, require minimal size: {}", new);
+                    return Err(anyhow::anyhow!(format!("failed to allocate memory for processus image, require minimal size: {}", new)));
                 }
                 ptr
             };
             self.img = ptr;
             self.imgsz = new;
         }
+        Ok(())
     }
 
     /*
@@ -119,13 +120,14 @@ impl ElfImg {
      * Load EHDR/PHDR/SHDR into image
     */
     fn load_static_hdrs(&mut self, binobj: &goblin::elf::Elf) -> Result<()> {
+        self.ToReallocOrNoToRealloc(binobj.header.e_ehsize as usize)?;
         let ehdr = self.img as *mut u8;
         unsafe {
             for i in 0..(binobj.header.e_ehsize as usize) {
                 std::ptr::write(ehdr.wrapping_add(i), self.buf[i]);
             }
         }
-        self.ToReallocOrNoToRealloc((binobj.header.e_phoff as usize) + (binobj.header.e_phentsize * binobj.header.e_phnum) as usize);
+        self.ToReallocOrNoToRealloc((binobj.header.e_phoff as usize) + (binobj.header.e_phentsize * binobj.header.e_phnum) as usize)?;
         let phdr = self.img.wrapping_add(binobj.header.e_phoff as usize);
         let add = binobj.header.e_phoff as usize;
         unsafe {
@@ -133,7 +135,7 @@ impl ElfImg {
                 std::ptr::write(phdr.wrapping_add(i), self.buf[i + add]);
             }
         }
-        self.ToReallocOrNoToRealloc((binobj.header.e_shoff as usize) + (binobj.header.e_shentsize * binobj.header.e_shnum) as usize);
+        self.ToReallocOrNoToRealloc((binobj.header.e_shoff as usize) + (binobj.header.e_shentsize * binobj.header.e_shnum) as usize)?;
         let shdr = self.img.wrapping_add(binobj.header.e_shoff as usize);
         let add = binobj.header.e_shoff as usize;
         unsafe {
@@ -168,14 +170,14 @@ impl ElfImg {
     */
     fn load_sections(&mut self, binobj: &goblin::elf::Elf) -> Result<()> {
         for shdr in &binobj.section_headers {
-            let tgt = match shdr.sh_addr {
-                0 => self.img.wrapping_add(shdr.sh_offset as usize),
-                _ => self.img.wrapping_add(shdr.sh_addr as usize),
+            let off = match shdr.sh_addr {
+                0 => shdr.sh_offset as usize,
+                _ => shdr.sh_addr as usize,
             };
-            let src = shdr.sh_offset as usize;
+            let tgt = self.img.wrapping_add(off);
             unsafe {
                 for i in 0..(shdr.sh_size as usize) {
-                    std::ptr::write(tgt.wrapping_add(i), self.buf[src + i]);
+                    std::ptr::write(tgt.wrapping_add(i), self.buf[off + i]);
                 }
             }
         }
@@ -188,10 +190,10 @@ impl ElfImg {
     fn load_so(&mut self, sof: &str) -> Result<usize> {
         let sop = &format!("{}{}", DYNAMIC_LIBRARY_PATH_LINUX, sof);
         let path = std::path::Path::new(&sop);
-        let buf = std::fs::read(path).with_context(|| format!("SO load: Failed to read the given path: {:?}", path))?;
-        let soobj = goblin::elf::Elf::parse(&buf).with_context(|| format!("SO load: Invalid ELF format: {:?}", path))?;
+        let buf = std::fs::read(path).with_context(|| format!("Failed to read the given path: {:?}", path))?;
+        let soobj = goblin::elf::Elf::parse(&buf).with_context(|| format!("Invalid ELF format: {:?}", path))?;
         let load = self.imgsz;
-        self.ToReallocOrNoToRealloc(self.imgsz + buf.len());
+        self.ToReallocOrNoToRealloc(self.imgsz + buf.len())?;
         unsafe {
             libc::memcpy(self.img.wrapping_add(load) as *mut libc::c_void, buf.as_ptr() as *const libc::c_void, buf.len());
         }
@@ -248,7 +250,6 @@ impl ElfImg {
     pub fn load(&mut self) -> Result<usize> {
         let bufcp = &self.buf.clone();
         let binobj = goblin::elf::Elf::parse(bufcp)?;
-        println!("{:?}", binobj.header);
         self.load_static_hdrs(&binobj)?;
         self.load_sections(&binobj)?;
         self.load_resolve_dynamic(&binobj)?;
