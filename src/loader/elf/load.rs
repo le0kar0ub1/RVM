@@ -300,7 +300,7 @@ impl ElfImg {
         self.load_resolve_dynamic(&binobj)?;
         self.dump_image()?;
         log!(format!("Process image loaded: size -> {:#X} | addr -> {:#X}", self.imgsz, self.img as usize));
-        Ok(binobj.header.e_entry as usize)
+        Ok(self.img as usize + binobj.header.e_entry as usize)
     }
 
     // pub fn SymAddrFromName(&self) {}

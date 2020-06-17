@@ -1,19 +1,30 @@
 use std::env;
 
 use anyhow::Result;
+use burst;
 
 mod loader;
 mod arch;
 
+fn launch(file: &String) -> Result<()> {
+    let mut elfimg = loader::elf::load::ElfImg::new(file)?;
+    let ep = elfimg.load()?;
+    let cpu = arch::x86::x86_64::cpu::Proc::new(0x10000, ep as u64)?;
+    let get = unsafe { 
+        std::slice::from_raw_parts((ep + 4) as *const u8, 16)
+    };
+    println!("{:#X?}", get);
+    let instr = burst::x86::disassemble_64(&get, 0, 16);
+    println!("{:?}", instr);
+    println!("Hello, world!");
+    Ok(())
+}
+
 fn main() -> Result<()> {
     let args: Vec<String> = env::args().collect();
-    match args.len() {
-        2 => (),
-        _ => panic!("Usage: \"cargo run $BINARY\"")
+    if args.len() != 2 {
+        return Err(anyhow::anyhow!("Usage: \"cargo run $BINARY\""))
     }
-    let mut elfimg = loader::elf::load::ElfImg::new(&args[1])?;
-    elfimg.load()?;
-    // let proc = arch::x86::x86_64::cpu::init(0, 0);
-    println!("Hello, world!");
+    launch(&args[1])?;
     Ok(())
 }

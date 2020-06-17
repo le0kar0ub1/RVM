@@ -11,6 +11,10 @@ pub type reg32  = u32;
 pub type reg16  = u16;
 pub type reg8   = u8;
 
+extern crate libc;
+
+use anyhow::Result;
+
 /*
  *  Register list
 */
@@ -189,16 +193,23 @@ impl Proc {
     /*
      * Create a processor
     */
-    pub fn new() -> Proc {
-        Proc {
+    pub fn new(stacksz: u64, entry: u64) -> Result<Proc> {
+        let ptr = unsafe {
+            let ptr: *mut u8 = libc::calloc(stacksz as usize, 1) as *mut u8;
+            if ptr.is_null() {
+                return Err(anyhow::anyhow!(format!("failed to allocate stack for processus, require minimal size: {}", stacksz)));
+            }
+            ptr as u64
+        };
+        Ok(Proc {
             rax : 0x0,
             rbx : 0x0,
             rcx : 0x0,
             rdx : 0x0,
             rsi : 0x0,
             rdi : 0x0,
-            rbp : 0x0,
-            rsp : 0x0,
+            rbp : ptr,
+            rsp : ptr,
             r8 : 0x0,
             r9 : 0x0,
             r10 : 0x0,
@@ -207,7 +218,7 @@ impl Proc {
             r13 : 0x0,
             r14 : 0x0,
             r15 : 0x0,
-            rip : 0x0,
+            rip : entry,
             rfl : 0x0,
             cpl : 0x0,
             es : 0x0,
@@ -259,7 +270,7 @@ impl Proc {
             xmm13 : 0x0,
             xmm14 : 0x0,
             xmm15 : 0x0,
-        }
+        })
     }
 
     /*
@@ -349,16 +360,4 @@ impl Proc {
         self.set64_register(reg, set)?;
         Ok(())
     }
-}
-
-/*
- * supervisor init processor
-*/
-pub fn init(stack: reg64, entry: reg64) -> Proc {
-    let mut new = Proc::new();
-    new.rbp = stack;
-    new.rsp = stack;
-    new.rip = entry;
-    println!(" Processor initialized");
-    new
 }
