@@ -18,4 +18,17 @@ impl Mem {
             segments: Vec::new()
         })
     }
+
+    pub fn segment_add(&mut self, addr: usize, size: usize, flags: comp::segments::SegmentFlag) {
+        self.segments.push(comp::segments::Segment::new(addr, size, flags));
+    }
+
+    pub fn segment_get(&self, addr: usize) -> comp::segments::SegmentFlag {
+        for seg in &self.segments {
+            if seg.addr <= addr && seg.addr + seg.size >= addr {
+                return seg.flags
+            }
+        }
+        comp::segments::SegmentFlag::Nop
+    }
 }
