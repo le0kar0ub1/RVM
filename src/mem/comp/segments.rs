@@ -3,7 +3,7 @@
 
 use anyhow::Result;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SegmentFlag {
     Nop = 0x0,
     Img = 0x1,
@@ -13,11 +13,18 @@ pub enum SegmentFlag {
     RWX = 0x5,
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum SegmentError {
+    SegmentNotFound = 0x0,
+    SegmentDirty    = 0x1,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Segment {
     pub addr: usize,
     pub size: usize,
     pub flags: SegmentFlag,
+    pub dirty: bool,
 }
 
 impl Segment {
@@ -26,15 +33,19 @@ impl Segment {
             addr,
             size,
             flags,
+            dirty: false,
         }
     }
 
-    pub fn destroy(&mut self, map: &mut Vec<Segment>) -> Result<()> {
-        for seg in 0..map.len() {
-            if self.addr == map[seg].addr {
-                map.remove(seg);
-            }
-        }
-        Ok(())
+    pub fn is_dirty(&self) -> bool {
+        self.dirty
+    }
+
+    pub fn soiled(&self) {
+        self.dirty = true;
+    }
+
+    pub fn unsoiled(&self) {
+        self.dirty = false;
     }
 }
