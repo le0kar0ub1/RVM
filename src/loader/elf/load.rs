@@ -60,7 +60,7 @@ impl ElfImg {
             _ => return Err(anyhow::anyhow!("Invalid target architecture")),
         }
         /*
-         * Juste init with a first alloc
+         * Just init with a first alloc
         */
         let ptr = unsafe {
             let ptr: *mut u8 = libc::calloc(0x100, 1) as *mut u8;

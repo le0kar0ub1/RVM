@@ -41,11 +41,11 @@ impl Segment {
         self.dirty
     }
 
-    pub fn soiled(&self) {
+    pub fn soiled(&mut self) {
         self.dirty = true;
     }
 
-    pub fn unsoiled(&self) {
+    pub fn unsoiled(&mut self) {
         self.dirty = false;
     }
 }

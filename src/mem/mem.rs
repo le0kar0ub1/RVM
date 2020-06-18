@@ -34,20 +34,18 @@ impl Mem {
 
     pub fn segment_get_flags(&self, addr: usize) -> comp::segments::SegmentFlag {
         let res = self.segment_get(addr);
-        match res.is_err() {
-            true => res.ok().unwrap().flags,
+        match res.is_ok() {
+            true => res.unwrap().flags,
             false => comp::segments::SegmentFlag::Nop,
         }
     }
 
-    pub fn segment_remove(&mut self, addr: usize) -> Result<()> {
-        let seg = self.segment_get(addr)?;
+    pub fn segment_remove(&mut self, seg: &comp::segments::Segment) {
         for srch in 0..self.segments.len() {
             if seg.addr == self.segments[srch].addr {
                 self.segments.remove(srch);
-                return Ok(());
+                break;
             }
         }
-        Err(());
     }
 }
