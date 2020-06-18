@@ -30,4 +30,8 @@ impl Stack {
             libc::free(self.addr as *mut libc::c_void);
         }
     }
+
+    pub fn get_addr(&self) -> usize {
+        self.addr
+    }
 }

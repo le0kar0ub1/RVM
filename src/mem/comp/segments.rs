@@ -1,22 +1,19 @@
 #![allow(unused_must_use)]
 #![allow(dead_code)]
 
-use anyhow::Result;
-
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SegmentFlag {
     Nop = 0x0,
-    Img = 0x1,
-    R   = 0x2,
-    RW  = 0x3,
-    RX  = 0x4,
-    RWX = 0x5,
+    R   = 0x4,
+    RW  = 0x6,
+    RX  = 0x5,
+    RWX = 0x7,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SegmentError {
-    SegmentNotFound = 0x0,
-    SegmentDirty    = 0x1,
+    SegmentNotFound,
+    SegmentDirty,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]

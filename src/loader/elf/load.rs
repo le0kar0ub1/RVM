@@ -10,6 +10,7 @@ extern crate libc;
 extern crate goblin;
 
 // use crate::arch;
+use crate::mem;
 
 use std::io::prelude::*;
 use std::fs::File;
@@ -21,7 +22,7 @@ const DYNAMIC_LIBRARY_PATH_LINUX: &str = "/usr/lib/";
 #[derive(Debug)]
 pub struct ElfImg {
     file: String,
-    img: *mut u8,
+    pub img: *mut u8,
     imgsz: usize,
     buf: Vec<u8>,
 }
@@ -146,27 +147,6 @@ impl ElfImg {
             }
         }
         Ok(())
-    }
-
-    /*
-     * Get section index from name
-    */
-    fn section_get_index_from_name(&mut self,
-                                   binobj: &goblin::elf::Elf,
-                                   sec: &mut String) -> Result<usize> {
-        let shdrtab = binobj.section_headers[binobj.header.e_shstrndx as usize].sh_offset;
-        sec.push(0x0 as char);
-        for idx in 0..binobj.section_headers.len() {
-            unsafe {
-                if libc::strcmp(
-                            (self.buf.as_ptr() as u64 + shdrtab + binobj.section_headers[idx].sh_name as u64) as *const i8,
-                            sec.as_ptr() as *const i8
-                        ) == 0 {
-                    return Ok(idx)
-                }
-            }
-        }
-        Err(anyhow::anyhow!("Invalid section requested"))
     }
 
     /*
@@ -303,6 +283,30 @@ impl ElfImg {
         Ok(self.img as usize + binobj.header.e_entry as usize)
     }
 
-    // pub fn SymAddrFromName(&self) {}
-    // pub fn SymNameFromAddr(&self) {}
+    /*
+     * Get Image segments 
+    */
+    pub fn load_segments(&mut self) -> Result<Vec<mem::comp::segments::Segment>> {
+        let mut segs: Vec<mem::comp::segments::Segment> = Vec::new();
+        let binobj = goblin::elf::Elf::parse(&self.buf)?;
+        for phdr in binobj.program_headers {
+            let flags: mem::comp::segments::SegmentFlag = match phdr.p_flags {
+                0x4 => mem::comp::segments::SegmentFlag::R,
+                0x5 => mem::comp::segments::SegmentFlag::RX,
+                0x6 => mem::comp::segments::SegmentFlag::RW,
+                0x7 => mem::comp::segments::SegmentFlag::RWX,
+                _ => mem::comp::segments::SegmentFlag::Nop,
+            };
+            segs.push(mem::comp::segments::Segment::new(phdr.p_vaddr as usize, phdr.p_filesz as usize, flags));
+        }
+        Ok(segs)
+    }
+
+    /*
+     * Get arch
+    */
+    pub fn load_get_arch(&self) -> Result<u16> {
+        let binobj = goblin::elf::Elf::parse(&self.buf)?;
+        Ok(binobj.header.e_machine)
+    }
 }

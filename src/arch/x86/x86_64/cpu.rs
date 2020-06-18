@@ -193,14 +193,7 @@ impl Proc {
     /*
      * Create a processor
     */
-    pub fn new(stacksz: u64, entry: u64) -> Result<Proc> {
-        let ptr = unsafe {
-            let ptr: *mut u8 = libc::calloc(stacksz as usize, 1) as *mut u8;
-            if ptr.is_null() {
-                return Err(anyhow::anyhow!(format!("failed to allocate stack for processus, require minimal size: {}", stacksz)));
-            }
-            ptr as u64
-        };
+    pub fn new(stack: u64, entry: u64) -> Result<Proc> {
         Ok(Proc {
             rax : 0x0,
             rbx : 0x0,
@@ -208,8 +201,8 @@ impl Proc {
             rdx : 0x0,
             rsi : 0x0,
             rdi : 0x0,
-            rbp : ptr,
-            rsp : ptr,
+            rbp : stack,
+            rsp : stack,
             r8 : 0x0,
             r9 : 0x0,
             r10 : 0x0,

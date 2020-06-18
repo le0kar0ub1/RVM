@@ -1,24 +1,23 @@
 use std::env;
 
+extern crate goblin;
+
 use anyhow::Result;
-use burst;
 
 mod loader;
 mod arch;
 mod mem;
 
-fn launch(file: &String) -> Result<()> {
+fn init(file: &String) -> Result<()> {
     let mut elfimg = loader::elf::load::ElfImg::new(file)?;
     let ep = elfimg.load()?;
-    let cpu = arch::x86::x86_64::cpu::Proc::new(0x10000, ep as u64)?;
-    let get = unsafe { 
-        std::slice::from_raw_parts((ep + 4) as *const u8, 16)
-    };
-    let mem = mem::mem::Mem::new(0x10000);
-    println!("{:#X?}", get);
-    let instr = burst::x86::disassemble_64(&get, 0, 16);
-    println!("{:?}", instr);
-    println!("Hello, world!");
+    let segments = elfimg.load_segments()?;
+    let mem = mem::mem::Mem::new(0x100000, segments)?;
+    let archres = elfimg.load_get_arch()?;
+    match archres {
+        goblin::elf::header::EM_X86_64 => arch::x86::x86_64::scheduler::init(mem, elfimg.img, ep),
+        _ => Err(anyhow::anyhow!("Unhandled architecture"))
+    }?;
     Ok(())
 }
 
@@ -27,6 +26,6 @@ fn main() -> Result<()> {
     if args.len() != 2 {
         return Err(anyhow::anyhow!("Usage: \"cargo run $BINARY\""))
     }
-    launch(&args[1])?;
+    init(&args[1])?;
     Ok(())
 }
