@@ -12,12 +12,10 @@ pub fn scheduler(mem: mem::mem::Mem, img: *mut u8, ep: usize, cpu: arch::x86::x8
         };
         let mut decoder = iced_x86::Decoder::new(64, &buffered, DecoderOptions::NONE);
         let instr = decoder.decode();
-        // if Mnemonic::And == instr.code().mnemonic() {}
-        // println!("{:?} {:?}", Mnemonic::And, instr.code().mnemonic());
         println!("{:?}", instr);
         ep += instr.next_ip() as usize;
+        arch::x86::shared::opcode_handler::handle_opcode(instr, mem)?;
     }
-    // break;
     Ok(())
 }
 
