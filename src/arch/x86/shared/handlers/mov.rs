@@ -3,7 +3,7 @@ use anyhow::Result;
 
 use crate::arch::x86::shared::cpu;
 
-use crate::mem::hit;
+use crate::mem::op;
 
 pub fn mov_handler(instr: Instruction) -> Result<()> {
     println!("{:?}", instr.code());
@@ -18,7 +18,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
         Code::Mov_rm16_imm16 => cpu::set16_register(instr.op_register(0), instr.immediate(1) as u16), 
         Code::Mov_rm8_imm8 => cpu::set8_register(instr.op_register(0), instr.immediate(1) as u8),
 
-        Code::Mov_r64_rm64 => 
+        // Code::Mov_r64_rm64 => 
         _ => Err(anyhow::anyhow!(format!("Invalid mov instruction:\n {:?}", instr)))
     }?;
     Ok(())

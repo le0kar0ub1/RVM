@@ -71,3 +71,19 @@ pub fn segment_remove(seg: &comp::segments::Segment) {
         }
     }
 }
+
+pub fn is_segment_valid(addr: usize) -> Result<()> {
+    Ok(())
+}
+
+pub fn is_segment_writable(addr: usize) -> Result<()> {
+    Ok(())
+}
+
+pub fn is_segment_executable(addr: usize) -> Result<()> {
+    Ok(())
+}
+
+pub fn is_segment_readable(addr: usize) -> Result<()> {
+    Ok(())
+}
