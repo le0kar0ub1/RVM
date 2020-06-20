@@ -15,31 +15,39 @@ pub struct Mem {
 */
 static mut mem: Mem = Mem {
     stack: comp::stack::Stack {
-        addr: 0,
-        size: 0,
-    },
+                addr: 0,
+                size: 0,
+            },
     segments: vec!(),
 };
 
 pub fn init(stacksz: u64, segments: Vec<comp::segments::Segment>) -> Result<()> {
     let stack = comp::stack::Stack::new(stacksz)?;
-    mem.stack = stack;
-    mem.segments = segments;
+    unsafe {
+        mem.stack = stack;
+        mem.segments = segments;
+    }
     Ok(())
 }
 
-pub fn get_stack() -> comp::stack::Stack {
-    mem.stack
+pub fn stack_get() -> comp::stack::Stack {
+    unsafe {
+        mem.stack
+    }
 }
 
 pub fn segment_add(addr: usize, size: usize, flags: comp::segments::SegmentFlag) {
-    mem.segments.push(comp::segments::Segment::new(addr, size, flags));
+    unsafe { 
+        mem.segments.push(comp::segments::Segment::new(addr, size, flags));
+    }
 }
 
 pub fn segment_get(addr: usize) -> Result<comp::segments::Segment> {
-    for seg in &mem.segments {
-        if seg.addr <= addr && seg.addr + seg.size >= addr {
-            return Ok(*seg)
+    unsafe {
+        for seg in &mem.segments {
+            if seg.addr <= addr && seg.addr + seg.size >= addr {
+                return Ok(*seg)
+            }
         }
     }
     Err(anyhow::anyhow!(format!("Invalid segment requested {}", addr)))
@@ -54,10 +62,12 @@ pub fn segment_get_flags(addr: usize) -> comp::segments::SegmentFlag {
 }
 
 pub fn segment_remove(seg: &comp::segments::Segment) {
-    for srch in 0..mem.segments.len() {
-        if seg.addr == mem.segments[srch].addr {
-            mem.segments.remove(srch);
-            break;
+    unsafe {
+        for srch in 0..mem.segments.len() {
+            if seg.addr == mem.segments[srch].addr {
+                mem.segments.remove(srch);
+                break;
+            }
         }
     }
 }

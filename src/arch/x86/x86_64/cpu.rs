@@ -264,25 +264,27 @@ static mut cpu: Proc = Proc {
  * Get register and returning his value
 */ 
 pub fn get64_register(reg: Register) -> ProcResult<reg64> {
-    match reg {
-        Register::RAX => Ok(cpu.rax),
-        Register::RBX => Ok(cpu.rbx),
-        Register::RCX => Ok(cpu.rcx),
-        Register::RDX => Ok(cpu.rdx),
-        Register::RSI => Ok(cpu.rsi),
-        Register::RDI => Ok(cpu.rdi),
-        Register::RBP => Ok(cpu.rbp),
-        Register::RSP => Ok(cpu.rsp),
-        Register::R8 => Ok(cpu.r8),
-        Register::R9 => Ok(cpu.r9),
-        Register::R10 => Ok(cpu.r10),
-        Register::R11 => Ok(cpu.r11),
-        Register::R12 => Ok(cpu.r12),
-        Register::R13 => Ok(cpu.r13),
-        Register::R14 => Ok(cpu.r14),
-        Register::R15 => Ok(cpu.r15),
-        Register::RIP => Ok(cpu.rip),
-        _ => Err(ProcError::InvalidRegister),
+    unsafe {
+        match reg {
+            Register::RAX => Ok(cpu.rax),
+            Register::RBX => Ok(cpu.rbx),
+            Register::RCX => Ok(cpu.rcx),
+            Register::RDX => Ok(cpu.rdx),
+            Register::RSI => Ok(cpu.rsi),
+            Register::RDI => Ok(cpu.rdi),
+            Register::RBP => Ok(cpu.rbp),
+            Register::RSP => Ok(cpu.rsp),
+            Register::R8 => Ok(cpu.r8),
+            Register::R9 => Ok(cpu.r9),
+            Register::R10 => Ok(cpu.r10),
+            Register::R11 => Ok(cpu.r11),
+            Register::R12 => Ok(cpu.r12),
+            Register::R13 => Ok(cpu.r13),
+            Register::R14 => Ok(cpu.r14),
+            Register::R15 => Ok(cpu.r15),
+            Register::RIP => Ok(cpu.rip),
+            _ => Err(ProcError::InvalidRegister),
+        }
     }
 }
 
@@ -305,25 +307,27 @@ pub fn get8_register(reg: Register) -> ProcResult<reg8> {
  * Set the register with given value
 */
 pub fn set64_register(reg: Register, val: reg64) -> ProcResult<()> {
-    match reg {
-        Register::RAX => { cpu.rax = val; Ok(()) },
-        Register::RBX => { cpu.rbx = val; Ok(()) },
-        Register::RCX => { cpu.rcx = val; Ok(()) },
-        Register::RDX => { cpu.rdx = val; Ok(()) },
-        Register::RSI => { cpu.rsi = val; Ok(()) },
-        Register::RDI => { cpu.rdi = val; Ok(()) },
-        Register::RBP => { cpu.rbp  = val; Ok(()) },
-        Register::RSP => { cpu.rsp  = val; Ok(()) },
-        Register::R8 => { cpu.r8 = val; Ok(()) },
-        Register::R9 => { cpu.r9 = val; Ok(()) },
-        Register::R10 => { cpu.r10 = val; Ok(()) },
-        Register::R11 => { cpu.r11 = val; Ok(()) },
-        Register::R12 => { cpu.r12 = val; Ok(()) },
-        Register::R13 => { cpu.r13 = val; Ok(()) },
-        Register::R14 => { cpu.r14 = val; Ok(()) },
-        Register::R15 => { cpu.r15 = val; Ok(()) },
-        Register::RIP => { cpu.rip = val; Ok(()) },
-        _ => Err(ProcError::InvalidRegister),
+    unsafe {
+        match reg {
+            Register::RAX => { cpu.rax = val; Ok(()) },
+            Register::RBX => { cpu.rbx = val; Ok(()) },
+            Register::RCX => { cpu.rcx = val; Ok(()) },
+            Register::RDX => { cpu.rdx = val; Ok(()) },
+            Register::RSI => { cpu.rsi = val; Ok(()) },
+            Register::RDI => { cpu.rdi = val; Ok(()) },
+            Register::RBP => { cpu.rbp  = val; Ok(()) },
+            Register::RSP => { cpu.rsp  = val; Ok(()) },
+            Register::R8 => { cpu.r8 = val; Ok(()) },
+            Register::R9 => { cpu.r9 = val; Ok(()) },
+            Register::R10 => { cpu.r10 = val; Ok(()) },
+            Register::R11 => { cpu.r11 = val; Ok(()) },
+            Register::R12 => { cpu.r12 = val; Ok(()) },
+            Register::R13 => { cpu.r13 = val; Ok(()) },
+            Register::R14 => { cpu.r14 = val; Ok(()) },
+            Register::R15 => { cpu.r15 = val; Ok(()) },
+            Register::RIP => { cpu.rip = val; Ok(()) },
+            _ => Err(ProcError::InvalidRegister),
+        }
     }
 }
 
@@ -349,7 +353,9 @@ pub fn set8_register(reg: Register, val: reg8) -> ProcResult<()> {
 }
 
 pub fn init(stack: u64, ep: u64) {
-    cpu.rsp = stack;
-    cpu.rbp = stack;
-    cpu.rip = ep;
+    unsafe {
+        cpu.rsp = stack;
+        cpu.rbp = stack;
+        cpu.rip = ep;
+    }
 }

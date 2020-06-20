@@ -5,9 +5,10 @@ extern crate libc;
 
 use anyhow::Result;
 
+#[derive(Copy, Clone, Debug)]
 pub struct Stack {
-    addr: usize,
-    size: u64,
+    pub addr: usize,
+    pub size: u64,
 }
 
 impl Stack {
