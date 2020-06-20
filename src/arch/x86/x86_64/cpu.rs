@@ -194,6 +194,7 @@ impl Proc {
      * Create a processor
     */
     pub fn new(stack: u64, entry: u64) -> Result<Proc> {
+        println!("Processor initialized");
         Ok(Proc {
             rax : 0x0,
             rbx : 0x0,
