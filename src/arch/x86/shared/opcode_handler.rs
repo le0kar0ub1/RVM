@@ -418,7 +418,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Monitor => Ok(()),
         Mnemonic::Monitorx => Ok(()),
         Mnemonic::Montmul => Ok(()),
-        Mnemonic::Mov => Ok(handlers::mov::Mov_handler()),
+        Mnemonic::Mov => Ok(handlers::mov::mov_handler(instr)),
         Mnemonic::Movapd => Ok(()),
         Mnemonic::Movaps => Ok(()),
         Mnemonic::Movbe => Ok(()),

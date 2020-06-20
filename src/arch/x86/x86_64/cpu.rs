@@ -15,80 +15,7 @@ extern crate libc;
 
 use anyhow::Result;
 
-/*
- *  Register list
-*/
-#[derive(Debug, Clone, Copy)]
-pub enum Register {
-    RAX,
-    RBX,
-    RCX,
-    RDX,
-    RSI,
-    RDI,
-    RBP,
-    RSP,
-    R8,
-    R9,
-    R10,
-    R11,
-    R12,
-    R13,
-    R14,
-    R15,
-    RIP,
-    RFL,
-    CPL,
-    ES,
-    CS,
-    SS,
-    DS,
-    FS,
-    GS,
-    LDT,
-    TR,
-    GDT, 
-    IDT,
-    CR0,
-    CR2,
-    CR3,
-    CR4,
-    DR0,
-    DR1,
-    DR2,
-    DR3,
-    DR6,
-    DR7,
-    EFER,
-    FCW,
-    FSW,
-    FTW,
-    MXCSR,
-    FPR0,
-    FPR1,
-    FPR2,
-    FPR3,
-    FPR4,
-    FPR5,
-    FPR6,
-    FPR7,
-    XMM00,
-    XMM01,
-    XMM02,
-    XMM03,
-    XMM04,
-    XMM05,
-    XMM06,
-    XMM07,
-    XMM08,
-    XMM09,
-    XMM10,
-    XMM11,
-    XMM12,
-    XMM13,
-    XMM14,
-    XMM15,
-}
+use iced_x86::*;
 
 /*
  * Struct describing the x64 processor
@@ -189,7 +116,7 @@ pub enum ProcError {
 
 pub type ProcResult<T> = Result<T, ProcError>;
 
-static mut cpu: Proc = Proc {
+static mut CPU: Proc = Proc {
     rax : 0x0,
     rbx : 0x0,
     rcx : 0x0,
@@ -266,23 +193,23 @@ static mut cpu: Proc = Proc {
 pub fn get64_register(reg: Register) -> ProcResult<reg64> {
     unsafe {
         match reg {
-            Register::RAX => Ok(cpu.rax),
-            Register::RBX => Ok(cpu.rbx),
-            Register::RCX => Ok(cpu.rcx),
-            Register::RDX => Ok(cpu.rdx),
-            Register::RSI => Ok(cpu.rsi),
-            Register::RDI => Ok(cpu.rdi),
-            Register::RBP => Ok(cpu.rbp),
-            Register::RSP => Ok(cpu.rsp),
-            Register::R8 => Ok(cpu.r8),
-            Register::R9 => Ok(cpu.r9),
-            Register::R10 => Ok(cpu.r10),
-            Register::R11 => Ok(cpu.r11),
-            Register::R12 => Ok(cpu.r12),
-            Register::R13 => Ok(cpu.r13),
-            Register::R14 => Ok(cpu.r14),
-            Register::R15 => Ok(cpu.r15),
-            Register::RIP => Ok(cpu.rip),
+            Register::RAX => Ok(CPU.rax),
+            Register::RBX => Ok(CPU.rbx),
+            Register::RCX => Ok(CPU.rcx),
+            Register::RDX => Ok(CPU.rdx),
+            Register::RSI => Ok(CPU.rsi),
+            Register::RDI => Ok(CPU.rdi),
+            Register::RBP => Ok(CPU.rbp),
+            Register::RSP => Ok(CPU.rsp),
+            Register::R8 => Ok(CPU.r8),
+            Register::R9 => Ok(CPU.r9),
+            Register::R10 => Ok(CPU.r10),
+            Register::R11 => Ok(CPU.r11),
+            Register::R12 => Ok(CPU.r12),
+            Register::R13 => Ok(CPU.r13),
+            Register::R14 => Ok(CPU.r14),
+            Register::R15 => Ok(CPU.r15),
+            Register::RIP => Ok(CPU.rip),
             _ => Err(ProcError::InvalidRegister),
         }
     }
@@ -309,23 +236,23 @@ pub fn get8_register(reg: Register) -> ProcResult<reg8> {
 pub fn set64_register(reg: Register, val: reg64) -> ProcResult<()> {
     unsafe {
         match reg {
-            Register::RAX => { cpu.rax = val; Ok(()) },
-            Register::RBX => { cpu.rbx = val; Ok(()) },
-            Register::RCX => { cpu.rcx = val; Ok(()) },
-            Register::RDX => { cpu.rdx = val; Ok(()) },
-            Register::RSI => { cpu.rsi = val; Ok(()) },
-            Register::RDI => { cpu.rdi = val; Ok(()) },
-            Register::RBP => { cpu.rbp  = val; Ok(()) },
-            Register::RSP => { cpu.rsp  = val; Ok(()) },
-            Register::R8 => { cpu.r8 = val; Ok(()) },
-            Register::R9 => { cpu.r9 = val; Ok(()) },
-            Register::R10 => { cpu.r10 = val; Ok(()) },
-            Register::R11 => { cpu.r11 = val; Ok(()) },
-            Register::R12 => { cpu.r12 = val; Ok(()) },
-            Register::R13 => { cpu.r13 = val; Ok(()) },
-            Register::R14 => { cpu.r14 = val; Ok(()) },
-            Register::R15 => { cpu.r15 = val; Ok(()) },
-            Register::RIP => { cpu.rip = val; Ok(()) },
+            Register::RAX => { CPU.rax = val; Ok(()) },
+            Register::RBX => { CPU.rbx = val; Ok(()) },
+            Register::RCX => { CPU.rcx = val; Ok(()) },
+            Register::RDX => { CPU.rdx = val; Ok(()) },
+            Register::RSI => { CPU.rsi = val; Ok(()) },
+            Register::RDI => { CPU.rdi = val; Ok(()) },
+            Register::RBP => { CPU.rbp  = val; Ok(()) },
+            Register::RSP => { CPU.rsp  = val; Ok(()) },
+            Register::R8 => { CPU.r8 = val; Ok(()) },
+            Register::R9 => { CPU.r9 = val; Ok(()) },
+            Register::R10 => { CPU.r10 = val; Ok(()) },
+            Register::R11 => { CPU.r11 = val; Ok(()) },
+            Register::R12 => { CPU.r12 = val; Ok(()) },
+            Register::R13 => { CPU.r13 = val; Ok(()) },
+            Register::R14 => { CPU.r14 = val; Ok(()) },
+            Register::R15 => { CPU.r15 = val; Ok(()) },
+            Register::RIP => { CPU.rip = val; Ok(()) },
             _ => Err(ProcError::InvalidRegister),
         }
     }
@@ -354,8 +281,8 @@ pub fn set8_register(reg: Register, val: reg8) -> ProcResult<()> {
 
 pub fn init(stack: u64, ep: u64) {
     unsafe {
-        cpu.rsp = stack;
-        cpu.rbp = stack;
-        cpu.rip = ep;
+        CPU.rsp = stack;
+        CPU.rbp = stack;
+        CPU.rip = ep;
     }
 }

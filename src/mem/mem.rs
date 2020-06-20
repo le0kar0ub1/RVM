@@ -13,7 +13,7 @@ pub struct Mem {
 /*
  * Init with shitty values
 */
-static mut mem: Mem = Mem {
+static mut MEM: Mem = Mem {
     stack: comp::stack::Stack {
                 addr: 0,
                 size: 0,
@@ -24,27 +24,27 @@ static mut mem: Mem = Mem {
 pub fn init(stacksz: u64, segments: Vec<comp::segments::Segment>) -> Result<()> {
     let stack = comp::stack::Stack::new(stacksz)?;
     unsafe {
-        mem.stack = stack;
-        mem.segments = segments;
+        MEM.stack = stack;
+        MEM.segments = segments;
     }
     Ok(())
 }
 
 pub fn stack_get() -> comp::stack::Stack {
     unsafe {
-        mem.stack
+        MEM.stack
     }
 }
 
 pub fn segment_add(addr: usize, size: usize, flags: comp::segments::SegmentFlag) {
     unsafe { 
-        mem.segments.push(comp::segments::Segment::new(addr, size, flags));
+        MEM.segments.push(comp::segments::Segment::new(addr, size, flags));
     }
 }
 
 pub fn segment_get(addr: usize) -> Result<comp::segments::Segment> {
     unsafe {
-        for seg in &mem.segments {
+        for seg in &MEM.segments {
             if seg.addr <= addr && seg.addr + seg.size >= addr {
                 return Ok(*seg)
             }
@@ -63,9 +63,9 @@ pub fn segment_get_flags(addr: usize) -> comp::segments::SegmentFlag {
 
 pub fn segment_remove(seg: &comp::segments::Segment) {
     unsafe {
-        for srch in 0..mem.segments.len() {
-            if seg.addr == mem.segments[srch].addr {
-                mem.segments.remove(srch);
+        for srch in 0..MEM.segments.len() {
+            if seg.addr == MEM.segments[srch].addr {
+                MEM.segments.remove(srch);
                 break;
             }
         }

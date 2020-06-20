@@ -12,7 +12,10 @@ pub fn scheduler(img: *mut u8, ep: usize) -> Result<()> {
         };
         let mut decoder = iced_x86::Decoder::new(64, &buffered, DecoderOptions::NONE);
         let instr = decoder.decode();
-        println!("{:?}", instr);
+        if instr.mnemonic() == Mnemonic::INVALID {
+            break;
+        }
+        // println!("{:?}", instr);
         ep += instr.next_ip() as usize;
         arch::x86::shared::opcode_handler::handle_opcode(instr)?;
     }
