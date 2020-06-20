@@ -23,7 +23,7 @@ pub fn scheduler(img: *mut u8, ep: usize) -> Result<()> {
 }
 
 pub fn init(img: *mut u8, ep: usize) -> Result<()> {
-    arch::x86::x86_64::cpu::init(mem::mem::stack_get().get_addr() as u64, ep as u64);
+    arch::x86::shared::cpu::init(mem::mem::stack_get().get_addr() as u64, ep as u64);
     scheduler(img, ep)?;
     Ok(())
 }

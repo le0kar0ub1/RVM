@@ -107,15 +107,6 @@ enum RegisterAccess {
     RegUsr = 0b1,
 }
 
-/*
- * Unused Error handling at time 
-*/
-pub enum ProcError {
-    InvalidRegister,
-}
-
-pub type ProcResult<T> = Result<T, ProcError>;
-
 static mut CPU: Proc = Proc {
     rax : 0x0,
     rbx : 0x0,
@@ -190,7 +181,7 @@ static mut CPU: Proc = Proc {
 /*
  * Get register and returning his value
 */ 
-pub fn get64_register(reg: Register) -> ProcResult<reg64> {
+pub fn get64_register(reg: Register) -> Result<reg64> {
     unsafe {
         match reg {
             Register::RAX => Ok(CPU.rax),
@@ -210,22 +201,22 @@ pub fn get64_register(reg: Register) -> ProcResult<reg64> {
             Register::R14 => Ok(CPU.r14),
             Register::R15 => Ok(CPU.r15),
             Register::RIP => Ok(CPU.rip),
-            _ => Err(ProcError::InvalidRegister),
+            _ => Err(anyhow::anyhow!("Invalid register")),
         }
     }
 }
 
-pub fn get32_register(reg: Register) -> ProcResult<reg32> {
+pub fn get32_register(reg: Register) -> Result<reg32> {
     let res = get64_register(reg)?;
     Ok(res as reg32)
 }
 
-pub fn get16_register(reg: Register) -> ProcResult<reg16> {
+pub fn get16_register(reg: Register) -> Result<reg16> {
     let res = get64_register(reg)?;
     Ok(res as reg16)
 }
 
-pub fn get8_register(reg: Register) -> ProcResult<reg8> {
+pub fn get8_register(reg: Register) -> Result<reg8> {
     let res = get64_register(reg)?;
     Ok(res as reg8)
 }
@@ -233,7 +224,7 @@ pub fn get8_register(reg: Register) -> ProcResult<reg8> {
 /*
  * Set the register with given value
 */
-pub fn set64_register(reg: Register, val: reg64) -> ProcResult<()> {
+pub fn set64_register(reg: Register, val: reg64) -> Result<()> {
     unsafe {
         match reg {
             Register::RAX => { CPU.rax = val; Ok(()) },
@@ -253,26 +244,26 @@ pub fn set64_register(reg: Register, val: reg64) -> ProcResult<()> {
             Register::R14 => { CPU.r14 = val; Ok(()) },
             Register::R15 => { CPU.r15 = val; Ok(()) },
             Register::RIP => { CPU.rip = val; Ok(()) },
-            _ => Err(ProcError::InvalidRegister),
+            _ => Err(anyhow::anyhow!("Invalid register")),
         }
     }
 }
 
-pub fn set32_register(reg: Register, val: reg32) -> ProcResult<()> {
+pub fn set32_register(reg: Register, val: reg32) -> Result<()> {
     let mut set: reg64 = get64_register(reg)?;
     set = (set & ((1 << 32) - 1)) | (val as reg64);
     set64_register(reg, set)?;
     Ok(())
 }
 
-pub fn set16_register(reg: Register, val: reg16) -> ProcResult<()> {
+pub fn set16_register(reg: Register, val: reg16) -> Result<()> {
     let mut set: reg64 = get64_register(reg)?;
     set = (set & ((1 << 16) - 1)) | (val as reg64);
     set64_register(reg, set)?;
     Ok(())
 }
 
-pub fn set8_register(reg: Register, val: reg8) -> ProcResult<()> {
+pub fn set8_register(reg: Register, val: reg8) -> Result<()> {
     let mut set: reg64 = get64_register(reg)?;
     set = (set & ((1 << 8) - 1)) | (val as reg64);
     set64_register(reg, set)?;

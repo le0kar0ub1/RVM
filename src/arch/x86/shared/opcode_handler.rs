@@ -1,6 +1,5 @@
 use anyhow::Result;
 
-use crate::mem;
 use crate::arch::x86::shared::handlers;
 
 use iced_x86::*;
@@ -418,7 +417,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Monitor => Ok(()),
         Mnemonic::Monitorx => Ok(()),
         Mnemonic::Montmul => Ok(()),
-        Mnemonic::Mov => Ok(handlers::mov::mov_handler(instr)),
+        Mnemonic::Mov => handlers::mov::mov_handler(instr),
         Mnemonic::Movapd => Ok(()),
         Mnemonic::Movaps => Ok(()),
         Mnemonic::Movbe => Ok(()),
