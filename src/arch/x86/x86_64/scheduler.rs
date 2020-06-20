@@ -4,7 +4,7 @@ use iced_x86::*;
 use crate::arch;
 use crate::mem;
 
-pub fn scheduler(mem: mem::mem::Mem, img: *mut u8, ep: usize) -> Result<()> {
+pub fn scheduler(img: *mut u8, ep: usize) -> Result<()> {
     let mut ep = ep;
     loop {
         let buffered = unsafe { 
@@ -14,13 +14,13 @@ pub fn scheduler(mem: mem::mem::Mem, img: *mut u8, ep: usize) -> Result<()> {
         let instr = decoder.decode();
         println!("{:?}", instr);
         ep += instr.next_ip() as usize;
-        arch::x86::shared::opcode_handler::handle_opcode(instr, mem)?;
+        arch::x86::shared::opcode_handler::handle_opcode(instr)?;
     }
     Ok(())
 }
 
-pub fn init(mem: mem::mem::Mem, img: *mut u8, ep: usize) -> Result<()> {
-    arch::x86::x86_64::cpu::init(mem.stack.get_addr() as u64, ep as u64);
-    scheduler(mem, img, ep)?;
+pub fn init(img: *mut u8, ep: usize) -> Result<()> {
+    arch::x86::x86_64::cpu::init(mem::mem::stack_get().get_addr() as u64, ep as u64);
+    scheduler(img, ep)?;
     Ok(())
 }

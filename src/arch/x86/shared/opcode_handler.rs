@@ -4,7 +4,7 @@ use crate::mem;
 
 use iced_x86::*;
 
-pub fn handle_opcode(instr: Instruction, mem: mem::mem::Mem) -> Result<()> {
+pub fn handle_opcode(instr: Instruction) -> Result<()> {
     match instr.mnemonic() {
         Mnemonic::Aam => Ok(()),
         Mnemonic::Aas => Ok(()),

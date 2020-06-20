@@ -6,46 +6,58 @@ use crate::mem::comp;
 use anyhow::Result;
 
 pub struct Mem {
-    pub stack: comp::stack::Stack,
+    stack: comp::stack::Stack,
     segments: Vec<comp::segments::Segment>,
 }
 
-impl Mem {
-    pub fn new(stacksz: u64, segments: Vec<comp::segments::Segment>) -> Result<Mem> {
-        let stack = comp::stack::Stack::new(stacksz)?;
-        Ok(Mem {
-            stack: stack,
-            segments: segments,
-        })
-    }
+/*
+ * Init with shitty values
+*/
+static mut mem: Mem = Mem {
+    stack: comp::stack::Stack {
+        addr: 0,
+        size: 0,
+    },
+    segments: vec!(),
+};
 
-    pub fn segment_add(&mut self, addr: usize, size: usize, flags: comp::segments::SegmentFlag) {
-        self.segments.push(comp::segments::Segment::new(addr, size, flags));
-    }
+pub fn init(stacksz: u64, segments: Vec<comp::segments::Segment>) -> Result<()> {
+    let stack = comp::stack::Stack::new(stacksz)?;
+    mem.stack = stack;
+    mem.segments = segments;
+    Ok(())
+}
 
-    pub fn segment_get(&self, addr: usize) -> Result<&comp::segments::Segment> {
-        for seg in &self.segments {
-            if seg.addr <= addr && seg.addr + seg.size >= addr {
-                return Ok(seg)
-            }
+pub fn get_stack() -> comp::stack::Stack {
+    mem.stack
+}
+
+pub fn segment_add(addr: usize, size: usize, flags: comp::segments::SegmentFlag) {
+    mem.segments.push(comp::segments::Segment::new(addr, size, flags));
+}
+
+pub fn segment_get(addr: usize) -> Result<comp::segments::Segment> {
+    for seg in &mem.segments {
+        if seg.addr <= addr && seg.addr + seg.size >= addr {
+            return Ok(*seg)
         }
-        Err(anyhow::anyhow!(format!("Invalid segment requested {}", addr)))
     }
+    Err(anyhow::anyhow!(format!("Invalid segment requested {}", addr)))
+}
 
-    pub fn segment_get_flags(&self, addr: usize) -> comp::segments::SegmentFlag {
-        let res = self.segment_get(addr);
-        match res.is_ok() {
-            true => res.unwrap().flags,
-            false => comp::segments::SegmentFlag::Nop,
-        }
+pub fn segment_get_flags(addr: usize) -> comp::segments::SegmentFlag {
+    let res = segment_get(addr);
+    match res.is_ok() {
+        true => res.unwrap().flags,
+        false => comp::segments::SegmentFlag::Nop,
     }
+}
 
-    pub fn segment_remove(&mut self, seg: &comp::segments::Segment) {
-        for srch in 0..self.segments.len() {
-            if seg.addr == self.segments[srch].addr {
-                self.segments.remove(srch);
-                break;
-            }
+pub fn segment_remove(seg: &comp::segments::Segment) {
+    for srch in 0..mem.segments.len() {
+        if seg.addr == mem.segments[srch].addr {
+            mem.segments.remove(srch);
+            break;
         }
     }
 }
