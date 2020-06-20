@@ -4,7 +4,7 @@ use iced_x86::*;
 use crate::arch;
 use crate::mem;
 
-pub fn scheduler(mem: mem::mem::Mem, img: *mut u8, ep: usize, cpu: arch::x86::x86_64::cpu::Proc) -> Result<()> {
+pub fn scheduler(mem: mem::mem::Mem, img: *mut u8, ep: usize) -> Result<()> {
     let mut ep = ep;
     loop {
         let buffered = unsafe { 
@@ -20,7 +20,7 @@ pub fn scheduler(mem: mem::mem::Mem, img: *mut u8, ep: usize, cpu: arch::x86::x8
 }
 
 pub fn init(mem: mem::mem::Mem, img: *mut u8, ep: usize) -> Result<()> {
-    let cpu = arch::x86::x86_64::cpu::Proc::new(mem.stack.get_addr() as u64, ep as u64)?;
-    scheduler(mem, img, ep, cpu)?;
+    arch::x86::x86_64::cpu::init(mem.stack.get_addr() as u64, ep as u64);
+    scheduler(mem, img, ep)?;
     Ok(())
 }
