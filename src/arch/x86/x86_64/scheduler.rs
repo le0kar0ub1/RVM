@@ -5,14 +5,22 @@ use crate::arch;
 use crate::mem;
 
 pub fn scheduler(img: *mut u8, ep: usize) -> Result<()> {
+    let xseg = mem::mem::segment_get(ep)?;
     let mut ep = ep;
-    loop {
-        let buffered = unsafe { 
-            std::slice::from_raw_parts(ep as *const u8, 16)
+    if (xseg.flags as u32 & mem::comp::segments::SegmentFlag::X as u32) == 0 {
+        return Err(anyhow::anyhow!("Entry point hit a non-executable segment"))
+    }
+    while xseg.addr <= ep && ep <= xseg.addr + xseg.size && xseg.dirty == false {
+        let rd = match (xseg.addr + xseg.size) - ep {
+            0..=16 => ((xseg.addr + xseg.size) - ep),
+            _ => 16
         };
+        let buffered = unsafe { 
+            std::slice::from_raw_parts(ep as *const u8, rd)
+        };
+        println!("{:?}", buffered);
         let mut decoder = iced_x86::Decoder::new(64, &buffered, DecoderOptions::NONE);
         let instr = decoder.decode();
-        println!("HERE");
         if instr.mnemonic() == Mnemonic::INVALID {
             break;
         }

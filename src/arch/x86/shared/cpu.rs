@@ -2,15 +2,6 @@
 #![allow(unused_must_use)]
 #![allow(dead_code)]
 
-/*
- * Some registers types
-*/
-pub type reg128 = u128;
-pub type reg64  = u64;
-pub type reg32  = u32;
-pub type reg16  = u16;
-pub type reg8   = u8;
-
 extern crate libc;
 
 use anyhow::Result;
@@ -21,74 +12,74 @@ use iced_x86::*;
  * Struct describing the x64 processor
 */
 pub struct Proc {
-    rax: reg64,
-    rbx: reg64,
-    rcx: reg64,
-    rdx: reg64,
-    rsi: reg64,
-    rdi: reg64,
-    rbp: reg64,
-    rsp: reg64,
-    r8: reg64,
-    r9: reg64,
-    r10: reg64,
-    r11: reg64,
-    r12: reg64,
-    r13: reg64,
-    r14: reg64,
-    r15: reg64,
-    rip: reg64,
-    rfl: reg64,
-    cpl: reg64,
-    es: reg16,
-    cs: reg16,
-    ss: reg16,
-    ds: reg16,
-    fs: reg16,
-    gs: reg16,
-    ldt: reg64,
-    tr: reg64,
-    gdt: reg64,
-    idt: reg64,
-    cr0: reg32,
-    cr2: reg64,
-    cr3: reg64,
-    cr4: reg32,
-    dr0: reg64,
-    dr1: reg64,
-    dr2: reg64,
-    dr3: reg64,
-    dr6: reg64,
-    dr7: reg64,
-    efer: reg64,
-    fcw: reg64,
-    fsw: reg64,
-    ftw: reg64,
-    mxcsr: reg64,
-    fpr0: reg64,
-    fpr1: reg64,
-    fpr2: reg64,
-    fpr3: reg64,
-    fpr4: reg64,
-    fpr5: reg64,
-    fpr6: reg64,
-    fpr7: reg64,
-    xmm00: reg128,
-    xmm01: reg128,
-    xmm02: reg128,
-    xmm03: reg128,
-    xmm04: reg128,
-    xmm05: reg128,
-    xmm06: reg128,
-    xmm07: reg128,
-    xmm08: reg128,
-    xmm09: reg128,
-    xmm10: reg128,
-    xmm11: reg128,
-    xmm12: reg128,
-    xmm13: reg128,
-    xmm14: reg128,
-    xmm15: reg128,
+    rax: u64,
+    rbx: u64,
+    rcx: u64,
+    rdx: u64,
+    rsi: u64,
+    rdi: u64,
+    rbp: u64,
+    rsp: u64,
+    r8: u64,
+    r9: u64,
+    r10: u64,
+    r11: u64,
+    r12: u64,
+    r13: u64,
+    r14: u64,
+    r15: u64,
+    rip: u64,
+    rfl: u64,
+    cpl: u64,
+    es: u16,
+    cs: u16,
+    ss: u16,
+    ds: u16,
+    fs: u16,
+    gs: u16,
+    ldt: u64,
+    tr: u64,
+    gdt: u64,
+    idt: u64,
+    cr0: u32,
+    cr2: u64,
+    cr3: u64,
+    cr4: u32,
+    dr0: u64,
+    dr1: u64,
+    dr2: u64,
+    dr3: u64,
+    dr6: u64,
+    dr7: u64,
+    efer: u64,
+    fcw: u64,
+    fsw: u64,
+    ftw: u64,
+    mxcsr: u64,
+    fpr0: u64,
+    fpr1: u64,
+    fpr2: u64,
+    fpr3: u64,
+    fpr4: u64,
+    fpr5: u64,
+    fpr6: u64,
+    fpr7: u64,
+    xmm00: u128,
+    xmm01: u128,
+    xmm02: u128,
+    xmm03: u128,
+    xmm04: u128,
+    xmm05: u128,
+    xmm06: u128,
+    xmm07: u128,
+    xmm08: u128,
+    xmm09: u128,
+    xmm10: u128,
+    xmm11: u128,
+    xmm12: u128,
+    xmm13: u128,
+    xmm14: u128,
+    xmm15: u128,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -181,7 +172,7 @@ static mut CPU: Proc = Proc {
 /*
  * Get register and returning his value
 */ 
-pub fn get64_register(reg: Register) -> Result<reg64> {
+pub fn get64_register(reg: Register) -> Result<u64> {
     unsafe {
         match reg {
             Register::RAX => Ok(CPU.rax),
@@ -206,25 +197,90 @@ pub fn get64_register(reg: Register) -> Result<reg64> {
     }
 }
 
-pub fn get32_register(reg: Register) -> Result<reg32> {
-    let res = get64_register(reg)?;
-    Ok(res as reg32)
+pub fn get32_register(reg: Register) -> Result<u32> {
+    unsafe {
+        match reg {
+            Register::EAX => Ok(CPU.rax as u32),
+            Register::EBX => Ok(CPU.rbx as u32),
+            Register::ECX => Ok(CPU.rcx as u32),
+            Register::EDX => Ok(CPU.rdx as u32),
+            Register::ESI => Ok(CPU.rsi as u32),
+            Register::EDI => Ok(CPU.rdi as u32),
+            Register::EBP => Ok(CPU.rbp as u32),
+            Register::ESP => Ok(CPU.rsp as u32),
+            Register::R8 => Ok(CPU.r8 as u32),
+            Register::R9D => Ok(CPU.r9 as u32),
+            Register::R10D => Ok(CPU.r10 as u32),
+            Register::R11D => Ok(CPU.r11 as u32),
+            Register::R12D => Ok(CPU.r12 as u32),
+            Register::R13D => Ok(CPU.r13 as u32),
+            Register::R14D => Ok(CPU.r14 as u32),
+            Register::R15D => Ok(CPU.r15 as u32),
+            Register::EIP => Ok(CPU.rip as u32),
+            _ => Err(anyhow::anyhow!("Invalid register")),
+        }
+    }
 }
 
-pub fn get16_register(reg: Register) -> Result<reg16> {
-    let res = get64_register(reg)?;
-    Ok(res as reg16)
+pub fn get16_register(reg: Register) -> Result<u16> {
+    unsafe {
+        match reg {
+            Register::AX => Ok(CPU.rax as u16),
+            Register::BX => Ok(CPU.rbx as u16),
+            Register::CX => Ok(CPU.rcx as u16),
+            Register::DX => Ok(CPU.rdx as u16),
+            Register::SI => Ok(CPU.rsi as u16),
+            Register::DI => Ok(CPU.rdi as u16),
+            Register::BP => Ok(CPU.rbp as u16),
+            Register::SP => Ok(CPU.rsp as u16),
+            Register::R8W => Ok(CPU.r8 as u16),
+            Register::R9W => Ok(CPU.r9 as u16),
+            Register::R10W => Ok(CPU.r10 as u16),
+            Register::R11W => Ok(CPU.r11 as u16),
+            Register::R12W => Ok(CPU.r12 as u16),
+            Register::R13W => Ok(CPU.r13 as u16),
+            Register::R14W => Ok(CPU.r14 as u16),
+            Register::R15W => Ok(CPU.r15 as u16),
+            // Register::IP  => Ok(CPU.rip as u16),
+            _ => Err(anyhow::anyhow!("Invalid register")),
+        }
+    }
 }
 
-pub fn get8_register(reg: Register) -> Result<reg8> {
-    let res = get64_register(reg)?;
-    Ok(res as reg8)
+pub fn get8_register(reg: Register) -> Result<u8> {
+    unsafe {
+        match reg {
+            Register::AL => Ok(CPU.rax as u8),
+            Register::BL => Ok(CPU.rbx as u8),
+            Register::CL => Ok(CPU.rcx as u8),
+            Register::DL => Ok(CPU.rdx as u8),
+            Register::SIL => Ok(CPU.rsi as u8),
+            Register::DIL => Ok(CPU.rdi as u8),
+            Register::SPL => Ok(CPU.rsp as u8),
+            Register::BPL => Ok(CPU.rbp as u8),
+
+            Register::AH => Ok(((CPU.rax as u16) >> 8) as u8),
+            Register::BH => Ok(((CPU.rbx as u16) >> 8) as u8),
+            Register::CH => Ok(((CPU.rcx as u16) >> 8) as u8),
+            Register::DH => Ok(((CPU.rdx as u16) >> 8) as u8),
+
+            Register::R8L => Ok(CPU.r8 as u8),
+            Register::R9L => Ok(CPU.r9 as u8),
+            Register::R10L => Ok(CPU.r10 as u8),
+            Register::R11L => Ok(CPU.r11 as u8),
+            Register::R12L => Ok(CPU.r12 as u8),
+            Register::R13L => Ok(CPU.r13 as u8),
+            Register::R14L => Ok(CPU.r14 as u8),
+            Register::R15L => Ok(CPU.r15 as u8),
+            _ => Err(anyhow::anyhow!("Invalid register")),
+        }
+    }
 }
 
 /*
  * Set the register with given value
 */
-pub fn set64_register(reg: Register, val: reg64) -> Result<()> {
+pub fn set64_register(reg: Register, val: u64) -> Result<()> {
     unsafe {
         match reg {
             Register::RAX => { CPU.rax = val; Ok(()) },
@@ -249,23 +305,26 @@ pub fn set64_register(reg: Register, val: reg64) -> Result<()> {
     }
 }
 
-pub fn set32_register(reg: Register, val: reg32) -> Result<()> {
-    let mut set: reg64 = get64_register(reg)?;
-    set = (set & ((1 << 32) - 1)) | (val as reg64);
+pub fn set32_register(reg: Register, val: u32) -> Result<()> {
+    let reg = reg.full_register();
+    let mut set: u64 = get64_register(reg)?;
+    set = (set & ((1 << 32) - 1)) | (val as u64);
     set64_register(reg, set)?;
     Ok(())
 }
 
-pub fn set16_register(reg: Register, val: reg16) -> Result<()> {
-    let mut set: reg64 = get64_register(reg)?;
-    set = (set & ((1 << 16) - 1)) | (val as reg64);
+pub fn set16_register(reg: Register, val: u16) -> Result<()> {
+    let reg = reg.full_register();
+    let mut set: u64 = get64_register(reg)?;
+    set = (set & ((1 << 16) - 1)) | (val as u64);
     set64_register(reg, set)?;
     Ok(())
 }
 
-pub fn set8_register(reg: Register, val: reg8) -> Result<()> {
-    let mut set: reg64 = get64_register(reg)?;
-    set = (set & ((1 << 8) - 1)) | (val as reg64);
+pub fn set8_register(reg: Register, val: u8) -> Result<()> {
+    let reg = reg.full_register();
+    let mut set: u64 = get64_register(reg)?;
+    set = (set & ((1 << 8) - 1)) | (val as u64);
     set64_register(reg, set)?;
     Ok(())
 }

@@ -4,6 +4,8 @@
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum SegmentFlag {
     Nop = 0x0,
+    X   = 0x1,
+    W   = 0x2,
     R   = 0x4,
     RW  = 0x6,
     RX  = 0x5,

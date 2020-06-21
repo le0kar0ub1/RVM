@@ -50,7 +50,7 @@ pub fn segment_get(addr: usize) -> Result<comp::segments::Segment> {
             }
         }
     }
-    Err(anyhow::anyhow!(format!("Invalid segment requested {}", addr)))
+    Err(anyhow::anyhow!(format!("Invalid segment requested {:#X}", addr)))
 }
 
 pub fn segment_get_flags(addr: usize) -> comp::segments::SegmentFlag {

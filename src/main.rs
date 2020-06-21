@@ -13,8 +13,8 @@ fn init(file: &String) -> Result<()> {
     let ep = elfimg.load()?;
     let segments = elfimg.load_segments()?;
     mem::mem::init(0x100000, segments)?;
-    let archres = elfimg.load_get_arch()?;
-    match archres {
+    let archtgt = elfimg.load_get_arch()?;
+    match archtgt {
         goblin::elf::header::EM_X86_64 => arch::x86::x86_64::scheduler::init(elfimg.img, ep),
         _ => Err(anyhow::anyhow!("Unhandled architecture"))
     }?;

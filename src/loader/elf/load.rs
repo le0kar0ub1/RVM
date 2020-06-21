@@ -93,6 +93,7 @@ impl ElfImg {
     */
     #[allow(non_snake_case)]
     fn ToReallocOrNoToRealloc(&mut self, new: usize) -> Result<()> {
+        let new = new + 0x1000;
         if new > self.imgsz {
             let ptr = unsafe {
                 let ptr: *mut u8 = libc::realloc(self.img as *mut libc::c_void, new) as *mut u8;
@@ -157,11 +158,13 @@ impl ElfImg {
             if shdr.sh_size == 0 {
                 continue;
             }
-            let off = match shdr.sh_offset {
-                0 => shdr.sh_addr as usize,
-                _ => shdr.sh_offset as usize,
+            let addr = match shdr.sh_addr {
+                0 => shdr.sh_offset as usize,
+                _ => shdr.sh_addr as usize,
             };
-            let tgt = self.img.wrapping_add(off);
+            let off = shdr.sh_offset as usize;
+            self.ToReallocOrNoToRealloc(addr + shdr.sh_size as usize)?;
+            let tgt = self.img.wrapping_add(addr);
             unsafe {
                 for i in 0..(shdr.sh_size as usize) {
                     std::ptr::write(tgt.wrapping_add(i), self.buf[off + i]);
@@ -302,7 +305,7 @@ impl ElfImg {
                 0x7 => mem::comp::segments::SegmentFlag::RWX,
                 _ => mem::comp::segments::SegmentFlag::Nop,
             };
-            segs.push(mem::comp::segments::Segment::new(phdr.p_vaddr as usize, phdr.p_filesz as usize, flags));
+            segs.push(mem::comp::segments::Segment::new(phdr.p_vaddr as usize + self.img as usize, phdr.p_filesz as usize, flags));
         }
         Ok(segs)
     }
