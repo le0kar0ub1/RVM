@@ -77,13 +77,16 @@ pub fn is_segment_valid(addr: usize) -> Result<()> {
 }
 
 pub fn is_segment_writable(addr: usize) -> Result<()> {
+    is_segment_valid(addr)?;
     Ok(())
 }
 
 pub fn is_segment_executable(addr: usize) -> Result<()> {
+    is_segment_valid(addr)?;
     Ok(())
 }
 
 pub fn is_segment_readable(addr: usize) -> Result<()> {
+    is_segment_valid(addr)?;
     Ok(())
 }

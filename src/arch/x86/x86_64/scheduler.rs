@@ -12,6 +12,7 @@ pub fn scheduler(img: *mut u8, ep: usize) -> Result<()> {
         };
         let mut decoder = iced_x86::Decoder::new(64, &buffered, DecoderOptions::NONE);
         let instr = decoder.decode();
+        println!("HERE");
         if instr.mnemonic() == Mnemonic::INVALID {
             break;
         }

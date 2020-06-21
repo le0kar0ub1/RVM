@@ -154,9 +154,12 @@ impl ElfImg {
     */
     fn load_sections(&mut self, binobj: &goblin::elf::Elf) -> Result<()> {
         for shdr in &binobj.section_headers {
-            let off = match shdr.sh_addr {
-                0 => shdr.sh_offset as usize,
-                _ => shdr.sh_addr as usize,
+            if shdr.sh_size == 0 {
+                continue;
+            }
+            let off = match shdr.sh_offset {
+                0 => shdr.sh_addr as usize,
+                _ => shdr.sh_offset as usize,
             };
             let tgt = self.img.wrapping_add(off);
             unsafe {
@@ -247,11 +250,13 @@ impl ElfImg {
             dynsymvec.push(*rel);
             dynsymname.push(&dynstr[binobj.dynsyms.to_vec()[rel.r_sym].st_name]);
         }
-        /* Load shared library */
-        for get in &dynamic.as_ref().unwrap().dyns {
-            if get.d_tag == 1 {
-                sovecstr.push(&dynstr[get.d_val as usize]);
-                sovecload.push(self.load_so(&dynstr[get.d_val as usize], &dynsymvec, &dynsymname)?);
+        if !dynamic.is_none() {
+            /* Load shared library */
+            for get in &dynamic.as_ref().unwrap().dyns {
+                if get.d_tag == 1 {
+                    sovecstr.push(&dynstr[get.d_val as usize]);
+                    sovecload.push(self.load_so(&dynstr[get.d_val as usize], &dynsymvec, &dynsymname)?);
+                }
             }
         }
         Ok(())

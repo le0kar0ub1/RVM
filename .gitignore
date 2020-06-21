@@ -15,4 +15,5 @@ Cargo.lock
 /target
 
 *.img
+sample
 strace
