@@ -3,7 +3,7 @@
 use iced_x86::*;
 use anyhow::Result;
 
-use crate as root;
+use crate::arch::x86::x86_64::scheduler;
 use crate::arch::x86::shared::cpu;
 use crate::arch::x86::x86_64::systbl;
 
@@ -15,7 +15,7 @@ pub fn syscall_handler(instr: Instruction) -> Result<()> {
         return Err(anyhow::anyhow!("Invalid syscall requested"))
     }
     if idx == systbl::EXIT {
-        root::supervisor_exit(cpu::get64_register(Register::RDI)? as i32);
+        scheduler::arch_exit(cpu::get64_register(Register::RDI)? as i32);
     } 
     Ok(())
 }

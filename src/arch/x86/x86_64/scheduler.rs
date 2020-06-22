@@ -1,6 +1,7 @@
 use anyhow::Result;
 use iced_x86::*;
 
+use crate as root;
 use crate::arch;
 use crate::mem;
 
@@ -26,7 +27,7 @@ pub fn scheduler(img: *mut u8, ep: usize) -> Result<()> {
         }
         // println!("{:?}", instr);
         ep += instr.next_ip() as usize;
-        arch::x86::shared::opcode_handler::handle_opcode(instr)?;
+        arch::x86::x86_64::opcode_handler::handle_opcode(instr)?;
     }
     Ok(())
 }
@@ -35,4 +36,8 @@ pub fn init(img: *mut u8, ep: usize) -> Result<()> {
     arch::x86::shared::cpu::init(mem::mem::stack_get().get_addr() as u64, ep as u64);
     scheduler(img, ep)?;
     Ok(())
+}
+
+pub fn arch_exit(exitcode: i32) {
+    root::supervisor_exit(exitcode);
 }

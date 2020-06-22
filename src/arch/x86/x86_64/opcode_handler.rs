@@ -1,6 +1,7 @@
 use anyhow::Result;
 
 use crate::arch::x86::shared::handlers;
+use crate::arch::x86::x86_64::handlers as archandlers;
 
 use iced_x86::*;
 
@@ -749,7 +750,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Subsd => Ok(()),
         Mnemonic::Subss => Ok(()),
         Mnemonic::Swapgs => Ok(()),
-        Mnemonic::Syscall => handlers::syscall::syscall_handler(instr),
+        Mnemonic::Syscall => archandlers::syscall::syscall_handler(instr),
         Mnemonic::Sysenter => Ok(()),
         Mnemonic::Sysexit => Ok(()),
         Mnemonic::Sysret => Ok(()),
