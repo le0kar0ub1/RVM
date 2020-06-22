@@ -6,9 +6,7 @@ use crate::arch::x86::shared::cpu;
 use crate::mem::op;
 
 pub fn mov_handler(instr: Instruction) -> Result<()> {
-    println!("{:?}", instr.code());
-    println!("{:?}", instr);
-    println!("{:?} {:?}", instr.op_register(0) as usize, Register::EBX as usize);
+    //println!("{:?}", instr.code());
     match instr.code() {
         Code::Mov_rm64_r64 => cpu::set64_register(instr.op_register(0), cpu::get64_register(instr.op_register(1))?),
         Code::Mov_rm32_r32 => cpu::set32_register(instr.op_register(0), cpu::get32_register(instr.op_register(1))?),

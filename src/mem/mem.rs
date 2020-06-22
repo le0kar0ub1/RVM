@@ -99,3 +99,13 @@ pub fn is_segment_readable(addr: usize) -> Result<()> {
     is_segment_valid(addr)?;
     Ok(())
 }
+
+pub fn iftranslation(addr: usize) -> usize {
+    unsafe {
+        if addr >= MEM.imglow && addr <= MEM.imghigh {
+            addr + MEM.trans
+        } else {
+            addr
+        }
+    }
+}

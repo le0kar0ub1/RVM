@@ -308,7 +308,7 @@ pub fn set64_register(reg: Register, val: u64) -> Result<()> {
 pub fn set32_register(reg: Register, val: u32) -> Result<()> {
     let reg = reg.full_register();
     let mut set: u64 = get64_register(reg)?;
-    set = (set & ((1 << 32) - 1)) | (val as u64);
+    set = ((set >> 32) << 32) | (val as u64);
     set64_register(reg, set)?;
     Ok(())
 }
@@ -316,7 +316,7 @@ pub fn set32_register(reg: Register, val: u32) -> Result<()> {
 pub fn set16_register(reg: Register, val: u16) -> Result<()> {
     let reg = reg.full_register();
     let mut set: u64 = get64_register(reg)?;
-    set = (set & ((1 << 16) - 1)) | (val as u64);
+    set = ((set >> 16) << 16) | (val as u64);
     set64_register(reg, set)?;
     Ok(())
 }
@@ -324,7 +324,7 @@ pub fn set16_register(reg: Register, val: u16) -> Result<()> {
 pub fn set8_register(reg: Register, val: u8) -> Result<()> {
     let reg = reg.full_register();
     let mut set: u64 = get64_register(reg)?;
-    set = (set & ((1 << 8) - 1)) | (val as u64);
+    set = ((set >> 8) << 8) | (val as u64);
     set64_register(reg, set)?;
     Ok(())
 }

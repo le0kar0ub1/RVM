@@ -19,14 +19,11 @@ pub fn scheduler(img: *mut u8, ep: usize) -> Result<()> {
         let buffered = unsafe { 
             std::slice::from_raw_parts(ep as *const u8, rd)
         };
-        println!("{:?}", buffered);
         let mut decoder = iced_x86::Decoder::new(64, &buffered, DecoderOptions::NONE);
         let instr = decoder.decode();
-        if instr.mnemonic() == Mnemonic::INVALID {
-            break;
-        }
-        ep += instr.next_ip() as usize;
         arch::x86::x86_64::opcode_handler::handle_opcode(instr)?;
+        ep += instr.next_ip() as usize;
+        arch::x86::shared::cpu::set64_register(Register::RIP, arch::x86::shared::cpu::get64_register(Register::RIP)? + ep as u64);
     }
     Ok(())
 }

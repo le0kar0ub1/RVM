@@ -8,7 +8,7 @@ use crate::arch::x86::x86_64::syscalls::systbl;
 
 pub fn syscall_handler(_instr: Instruction) -> Result<()> {
     let idx = cpu::get64_register(Register::RAX)?;
-    cpu::dump_user_base_regs();
+    // cpu::dump_user_base_regs();
     let ret = systbl::exec_syscall(idx as usize)?;
     cpu::set64_register(Register::RAX, ret as u64)?;
     Ok(())
