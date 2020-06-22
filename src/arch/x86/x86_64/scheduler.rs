@@ -25,7 +25,6 @@ pub fn scheduler(img: *mut u8, ep: usize) -> Result<()> {
         if instr.mnemonic() == Mnemonic::INVALID {
             break;
         }
-        // println!("{:?}", instr);
         ep += instr.next_ip() as usize;
         arch::x86::x86_64::opcode_handler::handle_opcode(instr)?;
     }
