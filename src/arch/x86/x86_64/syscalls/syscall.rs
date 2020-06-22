@@ -5,7 +5,7 @@ use anyhow::Result;
 
 use crate::arch::x86::x86_64::scheduler;
 use crate::arch::x86::shared::cpu;
-use crate::arch::x86::x86_64::systbl;
+use crate::arch::x86::x86_64::syscalls::systbl;
 
 pub fn syscall_handler(instr: Instruction) -> Result<()> {
     let idx = cpu::get64_register(Register::RAX)? as usize;
@@ -15,7 +15,8 @@ pub fn syscall_handler(instr: Instruction) -> Result<()> {
         return Err(anyhow::anyhow!("Invalid syscall requested"))
     }
     if idx == systbl::EXIT {
-        scheduler::arch_exit(cpu::get64_register(Register::RDI)? as i32);
+        let exitcode = cpu::get64_register(Register::RDI)?;
+        scheduler::arch_exit(exitcode as i32);
     } 
     Ok(())
 }

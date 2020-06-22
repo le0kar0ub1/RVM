@@ -19,6 +19,8 @@ use anyhow::{Context, Result};
 
 const DYNAMIC_LIBRARY_PATH_LINUX: &str = "/usr/lib/";
 
+const PROC_IMG_PATH: &str = "./procimg";
+
 #[derive(Debug)]
 pub struct ElfImg {
     file: String,
@@ -266,7 +268,7 @@ impl ElfImg {
     }
 
     fn dump_image(&self) -> Result<()> {
-        let mut f = File::create("output.img")?;
+        let mut f = File::create(PROC_IMG_PATH)?;
         let mut vec = Vec::new();
         unsafe {
             for i in 0..self.imgsz {

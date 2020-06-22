@@ -8,6 +8,7 @@ use anyhow::Result;
 pub struct Mem {
     stack: comp::stack::Stack,
     segments: Vec<comp::segments::Segment>,
+    trans: usize,
 }
 
 /*
@@ -19,13 +20,15 @@ static mut MEM: Mem = Mem {
                 size: 0,
             },
     segments: vec!(),
+    trans: 0,
 };
 
-pub fn init(stacksz: u64, segments: Vec<comp::segments::Segment>) -> Result<()> {
+pub fn init(stacksz: u64, segments: Vec<comp::segments::Segment>, trans: usize) -> Result<()> {
     let stack = comp::stack::Stack::new(stacksz)?;
     unsafe {
         MEM.stack = stack;
         MEM.segments = segments;
+        MEM.trans = trans;
     }
     Ok(())
 }
