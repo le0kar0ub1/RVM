@@ -1,4 +1,6 @@
-use std::env;
+#![feature(llvm_asm)]
+
+use std;
 
 extern crate goblin;
 
@@ -21,8 +23,13 @@ fn init(file: &String) -> Result<()> {
     Ok(())
 }
 
+fn supervisor_exit(exitcode: i32) -> ! {
+    println!("Program exit with code: {}", exitcode);
+    std::process::exit(0x0);
+}
+
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
+    let args: Vec<String> = std::env::args().collect();
     if args.len() != 2 {
         return Err(anyhow::anyhow!("Usage: \"cargo run $BINARY\""))
     }
