@@ -1,1 +1,2 @@
-// pub mod syscall;
+pub mod write;
+pub mod exit;

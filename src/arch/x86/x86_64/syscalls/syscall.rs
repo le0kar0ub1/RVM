@@ -3,26 +3,31 @@
 use iced_x86::*;
 use anyhow::Result;
 
-use crate::arch::x86::x86_64::scheduler;
 use crate::arch::x86::shared::cpu;
 use crate::arch::x86::x86_64::syscalls::systbl;
 
-pub fn syscall_handler(instr: Instruction) -> Result<()> {
-    let idx = cpu::get64_register(Register::RAX)? as usize;
-    println!("{:?}", instr);
+pub fn syscall_handler(_instr: Instruction) -> Result<()> {
+    let idx = cpu::get64_register(Register::RAX)?;
     cpu::dump_user_base_regs();
-    if idx > 256 {
-        return Err(anyhow::anyhow!("Invalid syscall requested"))
-    }
-    if idx == systbl::EXIT {
-        let exitcode = cpu::get64_register(Register::RDI)?;
-        scheduler::arch_exit(exitcode as i32);
-    } 
+    let ret = systbl::exec_syscall(idx as usize)?;
+    cpu::set64_register(Register::RAX, ret as u64)?;
     Ok(())
 }
 
+pub fn obtain_arg(arg: usize) -> usize {
+    match arg {
+        1 => cpu::get64_register(Register::RDI).unwrap() as usize,
+        2 => cpu::get64_register(Register::RSI).unwrap() as usize,
+        3 => cpu::get64_register(Register::RDX).unwrap() as usize,
+        4 => cpu::get64_register(Register::R10).unwrap() as usize,
+        5 => cpu::get64_register(Register::R8).unwrap() as usize,
+        6 => cpu::get64_register(Register::R9).unwrap() as usize,
+        _ => 0,
+    }
+}
+
 #[inline(always)]
-unsafe fn syscall0(n: usize) -> usize {
+pub unsafe fn syscall_exec0(n: usize) -> usize {
     let ret : usize;
     llvm_asm!("syscall" : "={rax}"(ret)
                    : "{rax}"(n)
@@ -32,7 +37,7 @@ unsafe fn syscall0(n: usize) -> usize {
 }
 
 #[inline(always)]
-unsafe fn syscall1(n: usize, a1: usize) -> usize {
+pub unsafe fn syscall_exec1(n: usize, a1: usize) -> usize {
     let ret : usize;
     llvm_asm!("syscall" : "={rax}"(ret)
                    : "{rax}"(n), "{rdi}"(a1)
@@ -42,7 +47,7 @@ unsafe fn syscall1(n: usize, a1: usize) -> usize {
 }
 
 #[inline(always)]
-unsafe fn syscall2(n: usize, a1: usize, a2: usize) -> usize {
+pub unsafe fn syscall_exec2(n: usize, a1: usize, a2: usize) -> usize {
     let ret : usize;
     llvm_asm!("syscall" : "={rax}"(ret)
                    : "{rax}"(n), "{rdi}"(a1), "{rsi}"(a2)
@@ -52,7 +57,7 @@ unsafe fn syscall2(n: usize, a1: usize, a2: usize) -> usize {
 }
 
 #[inline(always)]
-unsafe fn syscall3(n: usize, a1: usize, a2: usize, a3: usize) -> usize {
+pub unsafe fn syscall_exec3(n: usize, a1: usize, a2: usize, a3: usize) -> usize {
     let ret : usize;
     llvm_asm!("syscall" : "={rax}"(ret)
                    : "{rax}"(n), "{rdi}"(a1), "{rsi}"(a2), "{rdx}"(a3)
@@ -62,7 +67,7 @@ unsafe fn syscall3(n: usize, a1: usize, a2: usize, a3: usize) -> usize {
 }
 
 #[inline(always)]
-unsafe fn syscall4(n: usize, a1: usize, a2: usize, a3: usize,
+pub unsafe fn syscall_exec4(n: usize, a1: usize, a2: usize, a3: usize,
                                 a4: usize) -> usize {
     let ret : usize;
     llvm_asm!("syscall" : "={rax}"(ret)
@@ -74,7 +79,7 @@ unsafe fn syscall4(n: usize, a1: usize, a2: usize, a3: usize,
 }
 
 #[inline(always)]
-unsafe fn syscall5(n: usize, a1: usize, a2: usize, a3: usize,
+pub unsafe fn syscall_exec5(n: usize, a1: usize, a2: usize, a3: usize,
                                 a4: usize, a5: usize) -> usize {
     let ret : usize;
     llvm_asm!("syscall" : "={rax}"(ret)
@@ -86,7 +91,7 @@ unsafe fn syscall5(n: usize, a1: usize, a2: usize, a3: usize,
 }
 
 #[inline(always)]
-unsafe fn syscall6(n: usize, a1: usize, a2: usize, a3: usize,
+pub unsafe fn syscall_exec6(n: usize, a1: usize, a2: usize, a3: usize,
                                 a4: usize, a5: usize, a6: usize) -> usize {
     let ret : usize;
     llvm_asm!("syscall" : "={rax}"(ret)

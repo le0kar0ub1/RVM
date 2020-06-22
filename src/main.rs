@@ -14,7 +14,7 @@ fn init(file: &String) -> Result<()> {
     let mut elfimg = loader::elf::load::ElfImg::new(file)?;
     let ep = elfimg.load()?;
     let segments = elfimg.load_segments()?;
-    mem::mem::init(0x100000, segments, elfimg.img as usize)?;
+    mem::mem::init(0x100000, segments, elfimg.img as usize, 0, elfimg.imgsz as usize)?;
     let archtgt = elfimg.load_get_arch()?;
     match archtgt {
         goblin::elf::header::EM_X86_64 => arch::x86::x86_64::scheduler::init(elfimg.img, ep),

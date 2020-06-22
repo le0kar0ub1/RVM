@@ -25,7 +25,7 @@ const PROC_IMG_PATH: &str = "./procimg";
 pub struct ElfImg {
     file: String,
     pub img: *mut u8,
-    imgsz: usize,
+    pub imgsz: usize,
     buf: Vec<u8>,
 }
 

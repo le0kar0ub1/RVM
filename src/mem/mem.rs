@@ -9,6 +9,8 @@ pub struct Mem {
     stack: comp::stack::Stack,
     segments: Vec<comp::segments::Segment>,
     trans: usize,
+    imglow: usize,
+    imghigh: usize,
 }
 
 /*
@@ -21,14 +23,18 @@ static mut MEM: Mem = Mem {
             },
     segments: vec!(),
     trans: 0,
+    imglow: 0,
+    imghigh: 0,
 };
 
-pub fn init(stacksz: u64, segments: Vec<comp::segments::Segment>, trans: usize) -> Result<()> {
+pub fn init(stacksz: u64, segments: Vec<comp::segments::Segment>, trans: usize, imglow: usize, imghigh: usize) -> Result<()> {
     let stack = comp::stack::Stack::new(stacksz)?;
     unsafe {
         MEM.stack = stack;
         MEM.segments = segments;
         MEM.trans = trans;
+        MEM.imglow = imglow;
+        MEM.imghigh = imghigh;
     }
     Ok(())
 }
