@@ -336,3 +336,70 @@ pub fn init(stack: u64, ep: u64) {
         CPU.rip = ep;
     }
 }
+
+pub fn dump_reg(reg: Register) {
+    let val = unsafe {
+        match reg {
+            Register::RAX => CPU.rax,
+            Register::RBX => CPU.rbx,
+            Register::RCX => CPU.rcx,
+            Register::RDX => CPU.rdx,
+            Register::RSI => CPU.rsi,
+            Register::RDI => CPU.rdi,
+            Register::RBP => CPU.rbp,
+            Register::RSP => CPU.rsp,
+            Register::R8 => CPU.r8,
+            Register::R9 => CPU.r9,
+            Register::R10 => CPU.r10,
+            Register::R11 => CPU.r11,
+            Register::R12 => CPU.r12,
+            Register::R13 => CPU.r13,
+            Register::R14 => CPU.r14,
+            Register::R15 => CPU.r15,
+            Register::RIP => CPU.rip,
+            _ => 0,
+        }
+    };
+    println!("{:?}: {}\n", reg, val);
+}
+
+pub fn dump_user_base_regs() {
+    unsafe {
+        println!("{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+                  \r{:?}: {:#X}
+               ",
+            Register::RAX, CPU.rax,
+            Register::RBX, CPU.rbx,
+            Register::RCX, CPU.rcx,
+            Register::RDX, CPU.rdx,
+            Register::RSI, CPU.rsi,
+            Register::RDI, CPU.rdi,
+            Register::RBP, CPU.rbp,
+            Register::RSP, CPU.rsp,
+            Register::R8,  CPU.r8,
+            Register::R9,  CPU.r9,
+            Register::R10, CPU.r10,
+            Register::R11, CPU.r11,
+            Register::R12, CPU.r12,
+            Register::R13, CPU.r13,
+            Register::R14, CPU.r14,
+            Register::R15, CPU.r15,
+            Register::RIP, CPU.rip
+        )
+    }
+}

@@ -749,7 +749,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Subsd => Ok(()),
         Mnemonic::Subss => Ok(()),
         Mnemonic::Swapgs => Ok(()),
-        Mnemonic::Syscall => Ok(()),
+        Mnemonic::Syscall => handlers::syscall::syscall_handler(instr),
         Mnemonic::Sysenter => Ok(()),
         Mnemonic::Sysexit => Ok(()),
         Mnemonic::Sysret => Ok(()),
