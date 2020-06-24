@@ -29,6 +29,7 @@ where `$ToExec` is the executable you want run.
 |---------------|-----------------------|
 | `src/arch`    | [ref](src/arch)       |
 | `src/loader`  | [ref](src/loader)     |
+| `src/mem`     | [ref](src/mem)        |
 
 ## About
 

@@ -3,6 +3,4 @@
 
 This directory host the arch-specific targets.
 
-Handled architectures referenced below.
-
-* No one at time :)
+Currently only `x86_64` is handled.
