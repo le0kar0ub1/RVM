@@ -24,7 +24,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Aesenclast => Err(anyhow::anyhow!("Unhandled instruction 'Aesenclast'")),
         Mnemonic::Aesimc => Err(anyhow::anyhow!("Unhandled instruction 'Aesimc'")),
         Mnemonic::Aeskeygenassist => Err(anyhow::anyhow!("Unhandled instruction 'Aeskeygenassist'")),
-        Mnemonic::And => Err(anyhow::anyhow!("Unhandled instruction 'And'")),
+        Mnemonic::And => handlers::and::and_handler(instr),
         Mnemonic::Andn => Err(anyhow::anyhow!("Unhandled instruction 'Andn'")),
         Mnemonic::Andnpd => Err(anyhow::anyhow!("Unhandled instruction 'Andnpd'")),
         Mnemonic::Andnps => Err(anyhow::anyhow!("Unhandled instruction 'Andnps'")),
