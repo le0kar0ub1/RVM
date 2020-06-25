@@ -470,7 +470,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Neg => Err(anyhow::anyhow!("Unhandled instruction 'Neg'")),
         Mnemonic::Nop => Err(anyhow::anyhow!("Unhandled instruction 'Nop'")),
         Mnemonic::Not => Err(anyhow::anyhow!("Unhandled instruction 'Not'")),
-        Mnemonic::Or => Err(anyhow::anyhow!("Unhandled instruction 'Or'")),
+        Mnemonic::Or => handlers::or::or_handler(instr),
         Mnemonic::Orpd => Err(anyhow::anyhow!("Unhandled instruction 'Orpd'")),
         Mnemonic::Orps => Err(anyhow::anyhow!("Unhandled instruction 'Orps'")),
         Mnemonic::Out => Err(anyhow::anyhow!("Unhandled instruction 'Out'")),
