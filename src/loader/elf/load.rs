@@ -72,7 +72,7 @@ impl ElfImg {
             }
             ptr
         };
-        log!("parser initialized");
+        // log!("parser initialized");
         Ok (ElfImg {
             file: file.clone(),
             img: ptr,
@@ -224,7 +224,7 @@ impl ElfImg {
         unsafe {
             libc::memcpy(self.img.wrapping_add(load) as *mut libc::c_void, buf.as_ptr() as *const libc::c_void, buf.len());
         }
-        log!(format!("Loading SO {} at offset {:#X}", sop, load));
+        // log!(format!("Loading SO {} at offset {:#X}", sop, load));
         /* resolve relocations */
         self.load_resolve_relocs(&soobj, dynsymvec, dynsymname, load)?;
         Ok(load)
@@ -289,7 +289,7 @@ impl ElfImg {
         self.load_sections(&binobj)?;
         self.load_resolve_dynamic(&binobj)?;
         self.dump_image()?;
-        log!(format!("Process image loaded: size -> {:#X} | addr -> {:#X}", self.imgsz, self.img as usize));
+        // log!(format!("Process image loaded: size -> {:#X} | addr -> {:#X}", self.imgsz, self.img as usize));
         Ok(self.img as usize + binobj.header.e_entry as usize)
     }
 
