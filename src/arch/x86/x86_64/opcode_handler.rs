@@ -1521,7 +1521,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Xend => Err(anyhow::anyhow!("Unhandled instruction 'Xend'")),
         Mnemonic::Xgetbv => Err(anyhow::anyhow!("Unhandled instruction 'Xgetbv'")),
         Mnemonic::Xlatb => Err(anyhow::anyhow!("Unhandled instruction 'Xlatb'")),
-        Mnemonic::Xor => Err(anyhow::anyhow!("Unhandled instruction 'Xor'")),
+        Mnemonic::Xor => handlers::xor::xor_handler(instr),
         Mnemonic::Xorpd => Err(anyhow::anyhow!("Unhandled instruction 'Xorpd'")),
         Mnemonic::Xorps => Err(anyhow::anyhow!("Unhandled instruction 'Xorps'")),
         Mnemonic::Xrstor => Err(anyhow::anyhow!("Unhandled instruction 'Xrstor'")),
