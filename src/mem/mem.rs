@@ -27,8 +27,13 @@ static mut MEM: Mem = Mem {
     imghigh: 0,
 };
 
-pub fn init(stacksz: u64, segments: Vec<comp::segments::Segment>, trans: usize, imglow: usize, imghigh: usize) -> Result<()> {
+pub fn init(stacksz: u64, mut segments: Vec<comp::segments::Segment>, trans: usize, imglow: usize, imghigh: usize) -> Result<()> {
     let stack = comp::stack::Stack::new(stacksz)?;
+    segments.push(
+        comp::segments::Segment::new(
+            stack.addr as usize, stack.size as usize, comp::segments::SegmentFlag::RW
+        )
+    );
     unsafe {
         MEM.stack = stack;
         MEM.segments = segments;
@@ -81,22 +86,47 @@ pub fn segment_remove(seg: &comp::segments::Segment) {
     }
 }
 
-pub fn is_segment_valid(addr: usize) -> Result<()> {
+/*
+ * Called before safe check
+*/
+fn check_mmap_supervis(addr: usize, min: comp::segments::SegmentFlag) -> Result<()> {
+    let maps = procfs::process::Process::myself()?.maps()?;
+    for map in maps {
+        if addr > map.address.0 as usize && addr < map.address.1 as usize {
+            let cur = match map.perms.as_str() {
+                "r-xp" => comp::segments::SegmentFlag::RX,
+                "rw-p" => comp::segments::SegmentFlag::RW,
+                "r--p" => comp::segments::SegmentFlag::R,
+                "rwxp" => comp::segments::SegmentFlag::RWX,
+                _      => comp::segments::SegmentFlag::R,
+            };
+            if min as u8 & cur as u8 != 0 {
+                return Ok(())
+            } else {
+                break;
+            }
+        }
+    }
+    Err(anyhow::anyhow!(format!("want {:?} address {} not mapped", min, addr)))
+}
+
+pub fn is_segment_valid(addr: usize, seg: comp::segments::SegmentFlag) -> Result<()> {
+    check_mmap_supervis(addr, seg)?;
     Ok(())
 }
 
 pub fn is_segment_writable(addr: usize) -> Result<()> {
-    is_segment_valid(addr)?;
+    is_segment_valid(addr, comp::segments::SegmentFlag::W)?;
     Ok(())
 }
 
 pub fn is_segment_executable(addr: usize) -> Result<()> {
-    is_segment_valid(addr)?;
+    is_segment_valid(addr, comp::segments::SegmentFlag::X)?;
     Ok(())
 }
 
 pub fn is_segment_readable(addr: usize) -> Result<()> {
-    is_segment_valid(addr)?;
+    is_segment_valid(addr, comp::segments::SegmentFlag::R)?;
     Ok(())
 }
 

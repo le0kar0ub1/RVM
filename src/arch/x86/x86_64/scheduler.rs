@@ -5,7 +5,7 @@ use crate as root;
 use crate::arch;
 use crate::mem;
 
-pub fn scheduler(img: *mut u8, ep: usize) -> Result<()> {
+pub fn scheduler(_img: *mut u8, ep: usize) -> Result<()> {
     let xseg = mem::mem::segment_get(ep)?;
     let mut ep = ep;
     if (xseg.flags as u32 & mem::comp::segments::SegmentFlag::X as u32) == 0 {
