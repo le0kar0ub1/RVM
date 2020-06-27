@@ -469,7 +469,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Mwait => Err(anyhow::anyhow!("Unhandled instruction 'Mwait'")),
         Mnemonic::Mwaitx => Err(anyhow::anyhow!("Unhandled instruction 'Mwaitx'")),
         Mnemonic::Neg => Err(anyhow::anyhow!("Unhandled instruction 'Neg'")),
-        Mnemonic::Nop => Err(anyhow::anyhow!("Unhandled instruction 'Nop'")),
+        Mnemonic::Nop => handlers::nop::nop_handler(instr),
         Mnemonic::Not => Err(anyhow::anyhow!("Unhandled instruction 'Not'")),
         Mnemonic::Or => handlers::or::or_handler(instr),
         Mnemonic::Orpd => Err(anyhow::anyhow!("Unhandled instruction 'Orpd'")),
