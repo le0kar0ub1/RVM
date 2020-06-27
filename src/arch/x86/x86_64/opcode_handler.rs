@@ -6,13 +6,12 @@ use iced_x86::*;
 
 pub fn handle_opcode(instr: Instruction) -> Result<()> {
     use crate::arch::x86::shared::cpu;
-    cpu::dump_user_base_regs();
     match instr.mnemonic() {
         Mnemonic::Aam => Err(anyhow::anyhow!("Unhandled instruction 'Aam'")),
         Mnemonic::Aas => Err(anyhow::anyhow!("Unhandled instruction 'Aas'")),
         Mnemonic::Adc => Err(anyhow::anyhow!("Unhandled instruction 'Adc'")),
         Mnemonic::Adcx => Err(anyhow::anyhow!("Unhandled instruction 'Adcx'")),
-        Mnemonic::Add => Err(anyhow::anyhow!("Unhandled instruction 'Add'")),
+        Mnemonic::Add => handlers::add::add_handler(instr),
         Mnemonic::Addpd => Err(anyhow::anyhow!("Unhandled instruction 'Addpd'")),
         Mnemonic::Addps => Err(anyhow::anyhow!("Unhandled instruction 'Addps'")),
         Mnemonic::Addsd => Err(anyhow::anyhow!("Unhandled instruction 'Addsd'")),
@@ -745,7 +744,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Stosq => Err(anyhow::anyhow!("Unhandled instruction 'Stosq'")),
         Mnemonic::Stosw => Err(anyhow::anyhow!("Unhandled instruction 'Stosw'")),
         Mnemonic::Str => Err(anyhow::anyhow!("Unhandled instruction 'Str'")),
-        Mnemonic::Sub => Err(anyhow::anyhow!("Unhandled instruction 'Sub'")),
+        Mnemonic::Sub => handlers::sub::sub_handler(instr),
         Mnemonic::Subpd => Err(anyhow::anyhow!("Unhandled instruction 'Subpd'")),
         Mnemonic::Subps => Err(anyhow::anyhow!("Unhandled instruction 'Subps'")),
         Mnemonic::Subsd => Err(anyhow::anyhow!("Unhandled instruction 'Subsd'")),
