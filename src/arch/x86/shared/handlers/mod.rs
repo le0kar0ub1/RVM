@@ -5,3 +5,4 @@ pub mod and;
 pub mod add;
 pub mod sub;
 pub mod nop;
+pub mod push;

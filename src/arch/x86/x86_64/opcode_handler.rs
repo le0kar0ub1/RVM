@@ -644,7 +644,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Punpckldq => Err(anyhow::anyhow!("Unhandled instruction 'Punpckldq'")),
         Mnemonic::Punpcklqdq => Err(anyhow::anyhow!("Unhandled instruction 'Punpcklqdq'")),
         Mnemonic::Punpcklwd => Err(anyhow::anyhow!("Unhandled instruction 'Punpcklwd'")),
-        Mnemonic::Push => Err(anyhow::anyhow!("Unhandled instruction 'Push'")),
+        Mnemonic::Push => handlers::push::push_handler(instr),
         Mnemonic::Pusha => Err(anyhow::anyhow!("Unhandled instruction 'Pusha'")),
         Mnemonic::Pushf => Err(anyhow::anyhow!("Unhandled instruction 'Pushf'")),
         Mnemonic::Pxor => Err(anyhow::anyhow!("Unhandled instruction 'Pxor'")),
