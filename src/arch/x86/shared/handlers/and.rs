@@ -28,7 +28,17 @@ pub fn and_handler(instr: Instruction) -> Result<()> {
             (cpu::get16_register(instr.op_register(0))? & op::safe_get16(cpu::get64_register(instr.memory_base())? as usize )?) as u16),
         Code::And_r8_rm8   => op::safe_set8(cpu::get64_register(instr.memory_base())? as usize,
             (cpu::get8_register(instr.op_register(0))? & op::safe_get8(cpu::get64_register(instr.memory_base())? as usize )?) as u8),
-
+        
+        Code::And_rm64_imm8 => match instr.memory_base() == Register::None { 
+            true  => cpu::set64_register(instr.op_register(0), cpu::get64_register(instr.op_register(0))? & instr.immediate(1) as u64),
+            false => op::safe_set8(cpu::get64_register(instr.memory_base())? as usize, 
+                op::safe_get8(cpu::get64_register(instr.memory_base())? as usize)? & instr.immediate(1) as u8),
+        }
+        Code::And_rm32_imm8 => match instr.memory_base() == Register::None { 
+            true  => cpu::set32_register(instr.op_register(0), cpu::get32_register(instr.op_register(0))? & instr.immediate(1) as u32),
+            false => op::safe_set8(cpu::get32_register(instr.memory_base())? as usize, 
+                op::safe_get8(cpu::get32_register(instr.memory_base())? as usize)? & instr.immediate(1) as u8),
+        }
         Code::And_rm64_imm32 => op::safe_set64(cpu::get64_register(instr.memory_base())? as usize, instr.immediate(1) as u64),
         Code::And_rm32_imm32 => op::safe_set32(cpu::get64_register(instr.memory_base())? as usize, instr.immediate(1) as u32),
         Code::And_rm16_imm16 => op::safe_set16(cpu::get64_register(instr.memory_base())? as usize, instr.immediate(1) as u16),

@@ -5,6 +5,8 @@ use crate::arch::x86::x86_64::syscalls;
 use iced_x86::*;
 
 pub fn handle_opcode(instr: Instruction) -> Result<()> {
+    use crate::arch::x86::shared::cpu;
+    cpu::dump_user_base_regs();
     match instr.mnemonic() {
         Mnemonic::Aam => Err(anyhow::anyhow!("Unhandled instruction 'Aam'")),
         Mnemonic::Aas => Err(anyhow::anyhow!("Unhandled instruction 'Aas'")),
