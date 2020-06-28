@@ -1,5 +1,5 @@
 use iced_x86::*;
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 use crate::arch::x86::shared::cpu;
 
@@ -28,7 +28,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
         Code::Mov_r16_imm16 => cpu::set16_register(instr.op_register(0), instr.immediate(1) as u16),
         Code::Mov_r8_imm8 => cpu::set8_register(instr.op_register(0), instr.immediate(1) as u8),
 
-        _ => Err(anyhow::anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
+        _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
     }?;
     Ok(())
 }

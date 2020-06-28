@@ -4,7 +4,7 @@
 
 extern crate libc;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 use iced_x86::*;
 
@@ -192,7 +192,7 @@ pub fn get64_register(reg: Register) -> Result<u64> {
             Register::R14 => Ok(CPU.r14),
             Register::R15 => Ok(CPU.r15),
             Register::RIP => Ok(CPU.rip),
-            _ => Err(anyhow::anyhow!("Invalid register")),
+            _ => Err(anyhow!("Invalid register")),
         }
     }
 }
@@ -217,7 +217,7 @@ pub fn get32_register(reg: Register) -> Result<u32> {
             Register::R14D => Ok(CPU.r14 as u32),
             Register::R15D => Ok(CPU.r15 as u32),
             Register::EIP => Ok(CPU.rip as u32),
-            _ => Err(anyhow::anyhow!("Invalid register")),
+            _ => Err(anyhow!("Invalid register")),
         }
     }
 }
@@ -242,7 +242,7 @@ pub fn get16_register(reg: Register) -> Result<u16> {
             Register::R14W => Ok(CPU.r14 as u16),
             Register::R15W => Ok(CPU.r15 as u16),
             // Register::IP  => Ok(CPU.rip as u16),
-            _ => Err(anyhow::anyhow!("Invalid register")),
+            _ => Err(anyhow!("Invalid register")),
         }
     }
 }
@@ -272,7 +272,7 @@ pub fn get8_register(reg: Register) -> Result<u8> {
             Register::R13L => Ok(CPU.r13 as u8),
             Register::R14L => Ok(CPU.r14 as u8),
             Register::R15L => Ok(CPU.r15 as u8),
-            _ => Err(anyhow::anyhow!("Invalid register")),
+            _ => Err(anyhow!("Invalid register")),
         }
     }
 }
@@ -300,7 +300,7 @@ pub fn set64_register(reg: Register, val: u64) -> Result<()> {
             Register::R14 => { CPU.r14 = val; Ok(()) },
             Register::R15 => { CPU.r15 = val; Ok(()) },
             Register::RIP => { CPU.rip = val; Ok(()) },
-            _ => Err(anyhow::anyhow!("Invalid register")),
+            _ => Err(anyhow!("Invalid register")),
         }
     }
 }

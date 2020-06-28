@@ -3,7 +3,7 @@
 
 use crate::mem::comp;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 pub struct Mem {
     stack: comp::stack::Stack,
@@ -15,8 +15,9 @@ pub struct Mem {
 
 /*
  * Init with shitty values
+ * here is stored only the static memory 
 */
-static mut MEM: Mem = Mem {
+static mut STATIC_MEM: Mem = Mem {
     stack: comp::stack::Stack {
                 addr: 0,
                 size: 0,
@@ -35,36 +36,36 @@ pub fn init(stacksz: u64, mut segments: Vec<comp::segments::Segment>, trans: usi
         )
     );
     unsafe {
-        MEM.stack = stack;
-        MEM.segments = segments;
-        MEM.trans = trans;
-        MEM.imglow = imglow;
-        MEM.imghigh = imghigh;
+        STATIC_MEM.stack = stack;
+        STATIC_MEM.segments = segments;
+        STATIC_MEM.trans = trans;
+        STATIC_MEM.imglow = imglow;
+        STATIC_MEM.imghigh = imghigh;
     }
     Ok(())
 }
 
 pub fn stack_get() -> comp::stack::Stack {
     unsafe {
-        MEM.stack
+        STATIC_MEM.stack
     }
 }
 
 pub fn segment_add(addr: usize, size: usize, flags: comp::segments::SegmentFlag) {
     unsafe { 
-        MEM.segments.push(comp::segments::Segment::new(addr, size, flags));
+        STATIC_MEM.segments.push(comp::segments::Segment::new(addr, size, flags));
     }
 }
 
 pub fn segment_get(addr: usize) -> Result<comp::segments::Segment> {
     unsafe {
-        for seg in &MEM.segments {
+        for seg in &STATIC_MEM.segments {
             if seg.addr <= addr && seg.addr + seg.size >= addr {
                 return Ok(*seg)
             }
         }
     }
-    Err(anyhow::anyhow!(format!("Invalid segment requested {:#X}", addr)))
+    Err(anyhow!(format!("Invalid segment requested {:#X}", addr)))
 }
 
 pub fn segment_get_flags(addr: usize) -> comp::segments::SegmentFlag {
@@ -77,9 +78,9 @@ pub fn segment_get_flags(addr: usize) -> comp::segments::SegmentFlag {
 
 pub fn segment_remove(seg: &comp::segments::Segment) {
     unsafe {
-        for srch in 0..MEM.segments.len() {
-            if seg.addr == MEM.segments[srch].addr {
-                MEM.segments.remove(srch);
+        for srch in 0..STATIC_MEM.segments.len() {
+            if seg.addr == STATIC_MEM.segments[srch].addr {
+                STATIC_MEM.segments.remove(srch);
                 break;
             }
         }
@@ -98,7 +99,7 @@ fn check_mmap_supervis(addr: usize, min: comp::segments::SegmentFlag) -> Result<
                 "rw-p" => comp::segments::SegmentFlag::RW,
                 "r--p" => comp::segments::SegmentFlag::R,
                 "rwxp" => comp::segments::SegmentFlag::RWX,
-                _      => comp::segments::SegmentFlag::R,
+                 _     => comp::segments::SegmentFlag::R,
             };
             if min as u8 & cur as u8 != 0 {
                 return Ok(())
@@ -107,7 +108,7 @@ fn check_mmap_supervis(addr: usize, min: comp::segments::SegmentFlag) -> Result<
             }
         }
     }
-    Err(anyhow::anyhow!(format!("want {:?} address {} not mapped", min, addr)))
+    Err(anyhow!(format!("want {:?} address {} not mapped", min, addr)))
 }
 
 pub fn is_segment_valid(addr: usize, seg: comp::segments::SegmentFlag) -> Result<()> {
@@ -132,8 +133,8 @@ pub fn is_segment_readable(addr: usize) -> Result<()> {
 
 pub fn iftranslation(addr: usize) -> usize {
     unsafe {
-        if addr >= MEM.imglow && addr <= MEM.imghigh {
-            addr + MEM.trans
+        if addr >= STATIC_MEM.imglow && addr <= STATIC_MEM.imghigh {
+            addr + STATIC_MEM.trans
         } else {
             addr
         }

@@ -4,7 +4,7 @@ use std;
 
 extern crate goblin;
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 mod loader;
 mod arch;
@@ -18,7 +18,7 @@ fn init(file: &String) -> Result<()> {
     let archtgt = elfimg.load_get_arch()?;
     match archtgt {
         goblin::elf::header::EM_X86_64 => arch::x86::x86_64::scheduler::init(elfimg.img, ep),
-        _ => Err(anyhow::anyhow!("Unhandled architecture"))
+        _ => Err(anyhow!("Unhandled architecture"))
     }?;
     Ok(())
 }
@@ -31,7 +31,7 @@ fn supervisor_exit(exitcode: i32) -> ! {
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
     if args.len() != 2 {
-        return Err(anyhow::anyhow!("Usage: \"cargo run $BINARY\""))
+        return Err(anyhow!("Usage: \"cargo run $BINARY\""))
     }
     init(&args[1])?;
     Ok(())

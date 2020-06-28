@@ -1,7 +1,7 @@
 `src/mem`
 =========
 
-Here is handled all the memory artefact.
+Here is handled all the memory artefacts.
 
 | Component  | Description                                         |
 |------------|-----------------------------------------------------|

@@ -19,9 +19,9 @@ Assured by our servitor `cargo`.
 
 ## Run
 
-`caro run $ToExec`
+`caro run $BINARY`
 
-where `$ToExec` is the executable you want run.
+where `$BINARY` is the executable path you want run.
 
 ## Sub-Ref
 
@@ -33,11 +33,7 @@ where `$ToExec` is the executable you want run.
 
 ## About
 
-Handled architecure:
-
-In the scope:
-  * `x86`
-  * `x64`
+Scoped architecture: `x86_64`
 
 ## Epilogue
 

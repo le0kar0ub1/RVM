@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use iced_x86::*;
 
 use crate as root;
@@ -9,7 +9,7 @@ pub fn scheduler(_img: *mut u8, ep: usize) -> Result<()> {
     let xseg = mem::mem::segment_get(ep)?;
     let mut ep = ep;
     if (xseg.flags as u32 & mem::comp::segments::SegmentFlag::X as u32) == 0 {
-        return Err(anyhow::anyhow!("Entry point hit a non-executable segment"))
+        return Err(anyhow!("Entry point hit a non-executable segment"))
     }
     while xseg.addr <= ep && ep <= xseg.addr + xseg.size && xseg.dirty == false {
         let rd = match (xseg.addr + xseg.size) - ep {

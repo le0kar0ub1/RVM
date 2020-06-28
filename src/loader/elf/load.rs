@@ -15,7 +15,7 @@ use crate::mem;
 use std::io::prelude::*;
 use std::fs::File;
 
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, anyhow};
 
 const DYNAMIC_LIBRARY_PATH_LINUX: &str = "/usr/lib/";
 
@@ -60,7 +60,7 @@ impl ElfImg {
             goblin::elf::header::EM_X86_64 => (),
             goblin::elf::header::EM_386 => (),
             goblin::elf::header::EM_AARCH64 => (),
-            _ => return Err(anyhow::anyhow!("Invalid target architecture")),
+            _ => return Err(anyhow!("Invalid target architecture")),
         }
         /*
          * Just init with a first alloc
@@ -68,7 +68,7 @@ impl ElfImg {
         let ptr = unsafe {
             let ptr: *mut u8 = libc::calloc(0x100, 1) as *mut u8;
             if ptr.is_null() {
-                return Err(anyhow::anyhow!(format!("failed to allocate memory for processus image, require minimal size: {}", 0x100)));
+                return Err(anyhow!(format!("failed to allocate memory for processus image, require minimal size: {}", 0x100)));
             }
             ptr
         };
@@ -100,7 +100,7 @@ impl ElfImg {
             let ptr = unsafe {
                 let ptr: *mut u8 = libc::realloc(self.img as *mut libc::c_void, new) as *mut u8;
                 if ptr.is_null() {
-                    return Err(anyhow::anyhow!(format!("failed to allocate memory for processus image, require minimal size: {}", new)));
+                    return Err(anyhow!(format!("failed to allocate memory for processus image, require minimal size: {}", new)));
                 }
                 ptr
             };

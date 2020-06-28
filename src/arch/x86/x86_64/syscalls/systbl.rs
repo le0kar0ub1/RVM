@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 use crate::arch;
 
@@ -329,7 +329,7 @@ pub fn exec_syscall(idx: usize) -> Result<usize> {
         // 320 => arch::x86::x86_64::syscalls::handlers::kexec_file_load::syscall_kexec_file_load(320),
         // 321 => arch::x86::x86_64::syscalls::handlers::bpf::syscall_bpf(321),
         // 322 => arch::x86::x86_64::syscalls::handlers::execveat::syscall_execveat(322),
-        _ => Err(anyhow::anyhow!(format!("Unhandled syscall requested: {}", idx)))
+        _ => Err(anyhow!(format!("Unhandled syscall requested: {}", idx)))
     }
 }
 

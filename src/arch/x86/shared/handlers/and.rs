@@ -1,5 +1,5 @@
 use iced_x86::*;
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 use crate::arch::x86::shared::cpu;
 
@@ -52,7 +52,7 @@ pub fn and_handler(instr: Instruction) -> Result<()> {
         Code::And_rm16_imm16 => cpu::set64_register(instr.op_register(0), cpu::get64_register(instr.op_register(1))? & instr.immediate(1) as u64),
         Code::And_rm8_imm8   => cpu::set64_register(instr.op_register(0), cpu::get64_register(instr.op_register(1))? & instr.immediate(1) as u64),
 
-        _ => Err(anyhow::anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
+        _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
     }?;
     Ok(())
 }

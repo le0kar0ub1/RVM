@@ -1,5 +1,5 @@
 use iced_x86::*;
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 
 use crate::arch::x86::shared::cpu;
 
@@ -43,7 +43,7 @@ pub fn push_handler(instr: Instruction) -> Result<()> {
             op::safe_set32(cpu::get64_register(Register::RSP)? as usize, instr.immediate(0) as u32)?;
             Ok(4)
         }
-        _ => Err(anyhow::anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
+        _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
     }?;
     cpu::set64_register(Register::RSP, cpu::get64_register(Register::RSP)? - sub as u64)?;
     Ok(())
