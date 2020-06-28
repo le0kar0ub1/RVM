@@ -593,7 +593,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Pmulld => Err(anyhow!("Unhandled instruction 'Pmulld'")),
         Mnemonic::Pmullw => Err(anyhow!("Unhandled instruction 'Pmullw'")),
         Mnemonic::Pmuludq => Err(anyhow!("Unhandled instruction 'Pmuludq'")),
-        Mnemonic::Pop => Err(anyhow!("Unhandled instruction 'Pop'")),
+        Mnemonic::Pop => handlers::pop::pop_handler(instr),
         Mnemonic::Popa => Err(anyhow!("Unhandled instruction 'Popa'")),
         Mnemonic::Popcnt => Err(anyhow!("Unhandled instruction 'Popcnt'")),
         Mnemonic::Popf => Err(anyhow!("Unhandled instruction 'Popf'")),

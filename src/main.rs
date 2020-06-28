@@ -18,7 +18,7 @@ fn init(file: &String) -> Result<()> {
     let archtgt = elfimg.load_get_arch()?;
     match archtgt {
         goblin::elf::header::EM_X86_64 => arch::x86::x86_64::scheduler::init(elfimg.img, ep),
-        _ => Err(anyhow!("Unhandled architecture"))
+        _ => Err(anyhow!(format!("Unhandled architecture {:?}", archtgt)))
     }?;
     Ok(())
 }

@@ -6,3 +6,4 @@ pub mod add;
 pub mod sub;
 pub mod nop;
 pub mod push;
+pub mod pop;

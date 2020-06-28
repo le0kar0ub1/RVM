@@ -21,7 +21,7 @@ static mut STATIC_MEM: Mem = Mem {
     stack: comp::stack::Stack {
                 addr: 0,
                 size: 0,
-            },
+           },
     segments: vec!(),
     trans: 0,
     imglow: 0,
