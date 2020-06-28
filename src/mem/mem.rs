@@ -93,7 +93,7 @@ pub fn segment_remove(seg: &comp::segments::Segment) {
 fn check_mmap_supervis(addr: usize, min: comp::segments::SegmentFlag) -> Result<()> {
     let maps = procfs::process::Process::myself()?.maps()?;
     for map in maps {
-        if addr > map.address.0 as usize && addr < map.address.1 as usize {
+        if addr >= map.address.0 as usize && addr <= map.address.1 as usize {
             let cur = match map.perms.as_str() {
                 "r-xp" => comp::segments::SegmentFlag::RX,
                 "rw-p" => comp::segments::SegmentFlag::RW,
@@ -108,10 +108,25 @@ fn check_mmap_supervis(addr: usize, min: comp::segments::SegmentFlag) -> Result<
             }
         }
     }
-    Err(anyhow!(format!("want {:?} address {} not mapped", min, addr)))
+    unsafe {
+        if addr >= STATIC_MEM.imglow && addr <= STATIC_MEM.imghigh {
+            for seg in &STATIC_MEM.segments {
+                println!("{:?}", seg);
+                if addr >= seg.addr && addr <= seg.addr + seg.size {
+                    if seg.flags as u8 & min as u8 != 0 {
+                        return Ok(())
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    Err(anyhow!(format!("Operation [{:?}] on address {} not mapped", min, addr)))
 }
 
 pub fn is_segment_valid(addr: usize, seg: comp::segments::SegmentFlag) -> Result<()> {
+    let addr = iftranslation(addr);
     check_mmap_supervis(addr, seg)?;
     Ok(())
 }
