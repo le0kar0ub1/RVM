@@ -17,10 +17,10 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
         Code::Mov_r16_rm16 => cpu::set16_register(instr.op_register(0), op::safe_get16(instr.memory_displacement() as usize)? as u16),
         Code::Mov_r8_rm8   => cpu::set8_register(instr.op_register(0), op::safe_get8(instr.memory_displacement() as usize)? as u8),
 
-        Code::Mov_rm64_imm32 => op::safe_set64(cpu::get64_register(instr.memory_base())? as usize, instr.immediate(1)),
-        Code::Mov_rm32_imm32 => op::safe_set32(cpu::get64_register(instr.memory_base())? as usize, instr.immediate(1) as u32),
-        Code::Mov_rm16_imm16 => op::safe_set16(cpu::get64_register(instr.memory_base())? as usize, instr.immediate(1) as u16), 
-        Code::Mov_rm8_imm8 => op::safe_set8(cpu::get64_register(instr.memory_base())? as usize, instr.immediate(1) as u8),
+        Code::Mov_rm64_imm32 => op::safe_set64(instr.memory_displacement() as usize, instr.immediate(1)),
+        Code::Mov_rm32_imm32 => op::safe_set32(instr.memory_displacement() as usize, instr.immediate(1) as u32),
+        Code::Mov_rm16_imm16 => op::safe_set16(instr.memory_displacement() as usize, instr.immediate(1) as u16), 
+        Code::Mov_rm8_imm8 => op::safe_set8(instr.memory_displacement() as usize, instr.immediate(1) as u8),
 
         Code::Mov_r64_imm64 => cpu::set64_register(instr.op_register(0), instr.immediate(1)),
         Code::Mov_r32_imm32 => cpu::set32_register(instr.op_register(0), instr.immediate(1) as u32),

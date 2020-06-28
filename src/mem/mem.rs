@@ -90,7 +90,7 @@ pub fn segment_remove(seg: &comp::segments::Segment) {
 /*
  * Called before safe check
 */
-fn check_mmap_supervis(addr: usize, min: comp::segments::SegmentFlag) -> Result<()> {
+fn check_mmap_supervis(addr: usize, flg: comp::segments::SegmentFlag) -> Result<()> {
     let maps = procfs::process::Process::myself()?.maps()?;
     for map in maps {
         if addr >= map.address.0 as usize && addr <= map.address.1 as usize {
@@ -101,7 +101,7 @@ fn check_mmap_supervis(addr: usize, min: comp::segments::SegmentFlag) -> Result<
                 "rwxp" => comp::segments::SegmentFlag::RWX,
                  _     => comp::segments::SegmentFlag::R,
             };
-            if min as u8 & cur as u8 != 0 {
+            if flg as u8 & cur as u8 != 0 {
                 return Ok(())
             } else {
                 break;
@@ -113,7 +113,7 @@ fn check_mmap_supervis(addr: usize, min: comp::segments::SegmentFlag) -> Result<
             for seg in &STATIC_MEM.segments {
                 println!("{:?}", seg);
                 if addr >= seg.addr && addr <= seg.addr + seg.size {
-                    if seg.flags as u8 & min as u8 != 0 {
+                    if seg.flags as u8 & flg as u8 != 0 {
                         return Ok(())
                     } else {
                         break;
@@ -122,28 +122,28 @@ fn check_mmap_supervis(addr: usize, min: comp::segments::SegmentFlag) -> Result<
             }
         }
     }
-    Err(anyhow!(format!("Operation [{:?}] on address {} not mapped", min, addr)))
+    Err(anyhow!(format!("Operation [{:?}] on address {} not mapped", flg, addr)))
 }
 
-pub fn is_segment_valid(addr: usize, seg: comp::segments::SegmentFlag) -> Result<()> {
+pub fn is_segment_valid(addr: usize, seg: comp::segments::SegmentFlag) -> Result<usize> {
     let addr = iftranslation(addr);
     check_mmap_supervis(addr, seg)?;
-    Ok(())
+    Ok(addr)
 }
 
-pub fn is_segment_writable(addr: usize) -> Result<()> {
-    is_segment_valid(addr, comp::segments::SegmentFlag::W)?;
-    Ok(())
+pub fn is_segment_writable(addr: usize) -> Result<usize> {
+    let addr = is_segment_valid(addr, comp::segments::SegmentFlag::W)?;
+    Ok(addr)
 }
 
-pub fn is_segment_executable(addr: usize) -> Result<()> {
-    is_segment_valid(addr, comp::segments::SegmentFlag::X)?;
-    Ok(())
+pub fn is_segment_executable(addr: usize) -> Result<usize> {
+    let addr = is_segment_valid(addr, comp::segments::SegmentFlag::X)?;
+    Ok(addr)
 }
 
-pub fn is_segment_readable(addr: usize) -> Result<()> {
-    is_segment_valid(addr, comp::segments::SegmentFlag::R)?;
-    Ok(())
+pub fn is_segment_readable(addr: usize) -> Result<usize> {
+    let addr = is_segment_valid(addr, comp::segments::SegmentFlag::R)?;
+    Ok(addr)
 }
 
 pub fn iftranslation(addr: usize) -> usize {
