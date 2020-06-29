@@ -7,23 +7,23 @@ use crate::mem;
 
 pub fn scheduler(_img: *mut u8, ep: usize) -> Result<()> {
     let xseg = mem::mem::segment_get(ep)?;
-    let mut ep = ep;
+    let mut rip = ep;
     if (xseg.flags as u32 & mem::comp::segments::SegmentFlag::X as u32) == 0 {
         return Err(anyhow!("Entry point hit a non-executable segment"))
     }
-    while xseg.addr <= ep && ep <= xseg.addr + xseg.size && xseg.dirty == false {
-        let rd = match (xseg.addr + xseg.size) - ep {
-            0..=16 => ((xseg.addr + xseg.size) - ep),
+    while xseg.addr <= rip && rip <= xseg.addr + xseg.size && xseg.dirty == false {
+        let rd = match (xseg.addr + xseg.size) - rip {
+            0..=16 => ((xseg.addr + xseg.size) - rip),
             _ => 16
         };
         let buffered = unsafe { 
-            std::slice::from_raw_parts(ep as *const u8, rd)
+            std::slice::from_raw_parts(rip as *const u8, rd)
         };
         let mut decoder = iced_x86::Decoder::new(64, &buffered, DecoderOptions::NONE);
         let instr = decoder.decode();
         arch::x86::x86_64::opcode_handler::handle_opcode(instr)?;
-        ep += instr.next_ip() as usize;
-        arch::x86::shared::cpu::set64_register(Register::RIP, arch::x86::shared::cpu::get64_register(Register::RIP)? + ep as u64)?;
+        arch::x86::shared::cpu::set64_register(Register::RIP, arch::x86::shared::cpu::get64_register(Register::RIP)? + instr.next_ip() as u64)?;
+        rip = arch::x86::shared::cpu::get64_register(Register::RIP)? as usize;
     }
     Ok(())
 }
