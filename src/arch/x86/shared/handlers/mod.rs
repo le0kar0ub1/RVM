@@ -7,3 +7,5 @@ pub mod sub;
 pub mod nop;
 pub mod push;
 pub mod pop;
+pub mod endbr64;
+pub mod jmp;

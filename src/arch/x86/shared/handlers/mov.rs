@@ -7,10 +7,10 @@ use crate::mem::op;
 
 pub fn mov_handler(instr: Instruction) -> Result<()> {
     match instr.code() {
-        Code::Mov_rm64_r64 => op::safe_set64(instr.memory_displacement() as usize, cpu::get64_register(instr.op_register(1))?),
-        Code::Mov_rm32_r32 => op::safe_set32(instr.memory_displacement() as usize, cpu::get32_register(instr.op_register(1))?),
-        Code::Mov_rm16_r16 => op::safe_set16(instr.memory_displacement() as usize, cpu::get16_register(instr.op_register(1))?),
-        Code::Mov_rm8_r8   => op::safe_set8(instr.memory_displacement() as usize,  cpu::get8_register(instr.op_register(1))?),
+        Code::Mov_rm64_r64 => op::safe_set64(instr.memory_displacement64() as usize, cpu::get64_register(instr.op_register(1))?),
+        Code::Mov_rm32_r32 => op::safe_set32(instr.memory_displacement64() as usize, cpu::get32_register(instr.op_register(1))?),
+        Code::Mov_rm16_r16 => op::safe_set16(instr.memory_displacement64() as usize, cpu::get16_register(instr.op_register(1))?),
+        Code::Mov_rm8_r8   => op::safe_set8(instr.memory_displacement64() as usize,  cpu::get8_register(instr.op_register(1))?),
 
         Code::Mov_r64_rm64 => cpu::set64_register(instr.op_register(0), op::safe_get64(instr.memory_displacement() as usize)? as u64),
         Code::Mov_r32_rm32 => cpu::set32_register(instr.op_register(0), op::safe_get32(instr.memory_displacement() as usize)? as u32),
