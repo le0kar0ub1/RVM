@@ -61,49 +61,49 @@ pub fn unsafe_set64(addr: usize, val: u64) {
 }
 
 pub fn safe_get8(addr: usize) -> Result<u8> {
-    mem::is_segment_readable(addr)?;
+    mem::is_segment_readable(addr, 1)?;
     let addr = mem::iftranslation(addr);
     Ok(unsafe_get8(addr))
 }
 
 pub fn safe_get16(addr: usize) -> Result<u16> {
-    mem::is_segment_readable(addr)?;
+    mem::is_segment_readable(addr, 2)?;
     let addr = mem::iftranslation(addr);
     Ok(unsafe_get16(addr))
 }
 
 pub fn safe_get32(addr: usize) -> Result<u32> {
-    mem::is_segment_readable(addr)?;
+    mem::is_segment_readable(addr, 4)?;
     let addr = mem::iftranslation(addr);
     Ok(unsafe_get32(addr))
 }
 
 pub fn safe_get64(addr: usize) -> Result<u64> {
-    mem::is_segment_readable(addr)?;
+    mem::is_segment_readable(addr, 8)?;
     let addr = mem::iftranslation(addr);
     Ok(unsafe_get64(addr))
 }
 
 pub fn safe_set8(addr: usize, val: u8) -> Result<()> {
-    mem::is_segment_writable(addr)?;
+    mem::is_segment_writable(addr, 1)?;
     let addr = mem::iftranslation(addr);
     Ok(unsafe_set8(addr, val))
 }
 
 pub fn safe_set16(addr: usize, val: u16) -> Result<()> {
-    mem::is_segment_writable(addr)?;
+    mem::is_segment_writable(addr, 2)?;
     let addr = mem::iftranslation(addr);
     Ok(unsafe_set16(addr, val))
 }
 
 pub fn safe_set32(addr: usize, val: u32) -> Result<()> {
-    mem::is_segment_writable(addr)?;
+    mem::is_segment_writable(addr, 4)?;
     let addr = mem::iftranslation(addr);
     Ok(unsafe_set32(addr, val))
 }
 
 pub fn safe_set64(addr: usize, val: u64) -> Result<()> {
-    mem::is_segment_writable(addr)?;
+    mem::is_segment_writable(addr, 8)?;
     let addr = mem::iftranslation(addr);
     Ok(unsafe_set64(addr, val))
 }
