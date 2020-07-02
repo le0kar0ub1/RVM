@@ -8,4 +8,5 @@ pub mod nop;
 pub mod push;
 pub mod pop;
 pub mod endbr64;
+pub mod cmp;
 pub mod jmp;

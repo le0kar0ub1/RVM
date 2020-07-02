@@ -96,7 +96,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Cmovo => Err(anyhow!("Unhandled instruction 'Cmovo'")),
         Mnemonic::Cmovp => Err(anyhow!("Unhandled instruction 'Cmovp'")),
         Mnemonic::Cmovs => Err(anyhow!("Unhandled instruction 'Cmovs'")),
-        Mnemonic::Cmp => Err(anyhow!("Unhandled instruction 'Cmp'")),
+        Mnemonic::Cmp => handlers::cmp::cmp_handler(instr),
         Mnemonic::Cmppd => Err(anyhow!("Unhandled instruction 'Cmppd'")),
         Mnemonic::Cmpps => Err(anyhow!("Unhandled instruction 'Cmpps'")),
         Mnemonic::Cmpsb => Err(anyhow!("Unhandled instruction 'Cmpsb'")),

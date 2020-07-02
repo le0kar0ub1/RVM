@@ -80,6 +80,7 @@ pub struct Proc {
     xmm13: u128,
     xmm14: u128,
     xmm15: u128,
+    flags: u64,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -167,10 +168,43 @@ static mut CPU: Proc = Proc {
     xmm13 : 0x0,
     xmm14 : 0x0,
     xmm15 : 0x0,
+    flags : 0x0,
 };
 
+enum FlagRegister {
+    CF   = 0,
+    PF   = 2,
+    AF   = 4,
+    ZF   = 6,
+    SF   = 7,
+    TF   = 8,
+    IF   = 9,
+    DF   = 10,
+    OF   = 11,
+    IOPL = 12,
+    NT   = 14,
+    RF   = 16,
+    VM   = 17,
+    AC   = 18,
+    VIF  = 19,
+    VIP  = 20,
+    ID   = 21,
+}
+
+pub fn supervis_get_flags() -> u64 {
+    unsafe {
+        CPU.flags
+    }
+}
+
+pub fn supervis_set_flags(flags: u64) {
+    unsafe {
+        CPU.flags = flags;
+    }
+}
+
 /*
- * Get register and returning his value
+* Get register and returning his value
 */ 
 pub fn get64_register(reg: Register) -> Result<u64> {
     unsafe {
