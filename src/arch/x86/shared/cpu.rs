@@ -191,13 +191,13 @@ enum FlagRegister {
     ID   = 21,
 }
 
-pub fn supervis_get_flags() -> u64 {
+pub fn supervis_get_flags_register() -> u64 {
     unsafe {
         CPU.flags
     }
 }
 
-pub fn supervis_set_flags(flags: u64) {
+pub fn supervis_set_flags_register(flags: u64) {
     unsafe {
         CPU.flags = flags;
     }
