@@ -62,11 +62,11 @@ pub fn or_handler(instr: Instruction) -> Result<()> {
 
         Code::Or_r64_rm64 => { 
             if instr.memory_base() != Register::None {
-                op::safe_set64(cpu::get64_register(instr.memory_base())? as usize, 
-                    op::safe_get64(cpu::get64_register(instr.memory_base())? as usize)? | cpu::get64_register(instr.op_register(1))?)
+                cpu::set64_register(instr.op_register(0), 
+                    op::safe_get64(cpu::get64_register(instr.memory_base())? as usize)? | cpu::get64_register(instr.op_register(0))?)
             } else if instr.memory_displacement() != 0 {
-                op::safe_set64(instr.memory_displacement64() as usize,
-                    op::safe_get64(instr.memory_displacement64() as usize)? | cpu::get64_register(instr.op_register(1))?)
+                cpu::set64_register(instr.op_register(0), 
+                    op::safe_get64(instr.memory_displacement64() as usize)? | cpu::get64_register(instr.op_register(0))?)
             } else if instr.op_register(0) != Register::None {
                 cpu::set64_register(instr.op_register(0), cpu::get64_register(instr.op_register(0))? | cpu::get64_register(instr.op_register(1))?)
             } else {
@@ -75,11 +75,11 @@ pub fn or_handler(instr: Instruction) -> Result<()> {
         }
         Code::Or_r32_rm32 => {
             if instr.memory_base() != Register::None {
-                op::safe_set32(cpu::get64_register(instr.memory_base())? as usize, 
-                    op::safe_get32(cpu::get64_register(instr.memory_base())? as usize)? | cpu::get32_register(instr.op_register(1))?)
+                cpu::set32_register(instr.op_register(0), 
+                    op::safe_get32(cpu::get32_register(instr.memory_base())? as usize)? | cpu::get32_register(instr.op_register(0))?)
             } else if instr.memory_displacement() != 0 {
-                op::safe_set32(instr.memory_displacement64() as usize,
-                    op::safe_get32(instr.memory_displacement64() as usize)? | cpu::get32_register(instr.op_register(1))?)
+                cpu::set32_register(instr.op_register(0), 
+                    op::safe_get32(instr.memory_displacement64() as usize)? | cpu::get32_register(instr.op_register(0))?)
             } else if instr.op_register(0) != Register::None {
                 cpu::set32_register(instr.op_register(0), cpu::get32_register(instr.op_register(0))? | cpu::get32_register(instr.op_register(1))?)
             } else {
@@ -88,11 +88,11 @@ pub fn or_handler(instr: Instruction) -> Result<()> {
         }
         Code::Or_r16_rm16 => {
             if instr.memory_base() != Register::None {
-                op::safe_set16(cpu::get64_register(instr.memory_base())? as usize, 
-                    op::safe_get16(cpu::get64_register(instr.memory_base())? as usize)? | cpu::get16_register(instr.op_register(1))?)
+                cpu::set16_register(instr.op_register(0), 
+                    op::safe_get16(cpu::get16_register(instr.memory_base())? as usize)? | cpu::get16_register(instr.op_register(0))?)
             } else if instr.memory_displacement() != 0 {
-                op::safe_set16(instr.memory_displacement64() as usize,
-                    op::safe_get16(instr.memory_displacement64() as usize)? | cpu::get16_register(instr.op_register(1))?)
+                cpu::set16_register(instr.op_register(0), 
+                    op::safe_get16(instr.memory_displacement64() as usize)? | cpu::get16_register(instr.op_register(0))?)
             } else if instr.op_register(0) != Register::None {
                 cpu::set16_register(instr.op_register(0), cpu::get16_register(instr.op_register(0))? | cpu::get16_register(instr.op_register(1))?)
             } else {
@@ -101,11 +101,11 @@ pub fn or_handler(instr: Instruction) -> Result<()> {
         }
         Code::Or_r8_rm8 => {
             if instr.memory_base() != Register::None {
-                op::safe_set8(cpu::get64_register(instr.memory_base())? as usize, 
-                    op::safe_get8(cpu::get64_register(instr.memory_base())? as usize)? | cpu::get8_register(instr.op_register(1))?)
+                cpu::set8_register(instr.op_register(0), 
+                    op::safe_get8(cpu::get8_register(instr.memory_base())? as usize)? | cpu::get8_register(instr.op_register(0))?)
             } else if instr.memory_displacement() != 0 {
-                op::safe_set8(instr.memory_displacement64() as usize,
-                    op::safe_get8(instr.memory_displacement64() as usize)? | cpu::get8_register(instr.op_register(1))?)
+                cpu::set8_register(instr.op_register(0), 
+                    op::safe_get8(instr.memory_displacement64() as usize)? | cpu::get8_register(instr.op_register(0))?)
             } else if instr.op_register(0) != Register::None {
                 cpu::set8_register(instr.op_register(0), cpu::get8_register(instr.op_register(0))? | cpu::get8_register(instr.op_register(1))?)
             } else {
