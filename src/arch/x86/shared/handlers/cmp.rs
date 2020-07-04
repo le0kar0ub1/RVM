@@ -6,8 +6,7 @@ use crate::arch::x86::shared::cpu;
 use crate::mem::op;
 
 pub fn cmp_handler(instr: Instruction) -> Result<()> {
-    let mut flg = cpu::supervis_get_flags_register();
-    let cmp = match instr.code() {
+    let _cmp = match instr.code() {
         Code::Cmp_r8_rm8 => {
             if instr.memory_base() != Register::None {
                 Ok([op::safe_get64(cpu::get64(instr.memory_base())? as usize)?, cpu::get8(instr.op_register(1))? as u64, 8])
@@ -135,16 +134,5 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
         }
         _ => Err(anyhow!("Invalid opcode"))
     }?;
-    let res = cmp[0] - cmp[1];
-    flg |= match res {
-        0 => cpu::FlagRegister::ZF as u64,
-        _ => 0,
-    };
-    flg |= match res & (1 << cmp[2]) {
-        0 => 0,
-        _ => cpu::FlagRegister::SF as u64,
-    };
-    println!("{:?}", cmp);
-    cpu::supervis_set_flags_register(flg);
     Ok(())
 }

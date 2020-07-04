@@ -17,7 +17,7 @@ fn opcheckup(xlen: u8, ylen: u8) -> Result<()> {
     }
 }
 
-fn uflagupdate(res: (u64, bool), len: u8) {
+fn flagupdate(res: (u64, bool), len: u8) {
     let mut flg = cpu::supervis_get_flags_register();
 
     flg |= match res.1 {
@@ -28,60 +28,27 @@ fn uflagupdate(res: (u64, bool), len: u8) {
         0 => cpu::FlagRegister::ZF as u64,
         _ => 0,
     };
-    flg |= match res.0 & (1 << len) {
+    flg |= match res.0 & (1 << (len - 1)) {
        0 => 0,
        _ => cpu::FlagRegister::SF as u64,
     };
     cpu::supervis_set_flags_register(flg);
 }
 
-fn sflagupdate(res: (i64, bool), len: u8) {
-    let mut flg = cpu::supervis_get_flags_register();
 
-    flg |= match res.1 {
-        true => cpu::FlagRegister::OF as u64,
-        false => 0 as u64,
-    };
-    flg |= match res.0 {
-        0 => cpu::FlagRegister::ZF as u64,
-        _ => 0,
-    };
-    flg |= match res.0 & (1 << len) {
-       0 => 0,
-       _ => cpu::FlagRegister::SF as u64,
-    };
-    cpu::supervis_set_flags_register(flg);
-}
-
-pub fn uadd(x: u64, y: u64, xlen: u8, ylen: u8) -> Result<u64> {
+pub fn add(x: u64, y: u64, xlen: u8, ylen: u8) -> Result<u64> {
     opcheckup(xlen, ylen)?;
     let mlen = if xlen > ylen { xlen } else { ylen };
     let res = x.overflowing_add(y);
-    uflagupdate(res, mlen);
+    flagupdate(res, mlen);
     Ok(res.0)
 }
 
-pub fn sadd(x: i64, y: i64, xlen: u8, ylen: u8) -> Result<i64> {
-    opcheckup(xlen, ylen)?;
-    let mlen = if xlen > ylen { xlen } else { ylen };
-    let res = x.overflowing_add(y);
-    sflagupdate(res, mlen);
-    Ok(res.0)
-}
-
-pub fn usub(x: u64, y: u64, xlen: u8, ylen: u8) -> Result<u64> {
+pub fn sub(x: u64, y: u64, xlen: u8, ylen: u8) -> Result<u64> {
     opcheckup(xlen, ylen)?;
     let mlen = if xlen > ylen { xlen } else { ylen };
     let res = x.overflowing_sub(y);
-    uflagupdate(res, mlen);
-    Ok(res.0)
-}
-
-pub fn ssub(x: i64, y: i64, xlen: u8, ylen: u8) -> Result<i64> {
-    opcheckup(xlen, ylen)?;
-    let mlen = if xlen > ylen { xlen } else { ylen };
-    let res = x.overflowing_sub(y);
-    sflagupdate(res, mlen);
+    flagupdate(res, mlen);
     Ok(res.0)
 }
 
@@ -89,7 +56,7 @@ pub fn or(x: u64, y: u64, xlen: u8, ylen: u8) -> Result<u64> {
     opcheckup(xlen, ylen)?;
     let mlen = if xlen > ylen { xlen } else { ylen };
     let res = x | y;
-    uflagupdate((res, false), mlen);
+    flagupdate((res, false), mlen);
     Ok(res)
 }
 
@@ -97,7 +64,7 @@ pub fn and(x: u64, y: u64, xlen: u8, ylen: u8) -> Result<u64> {
     opcheckup(xlen, ylen)?;
     let mlen = if xlen > ylen { xlen } else { ylen };
     let res = x & y;
-    uflagupdate((res, false), mlen);
+    flagupdate((res, false), mlen);
     Ok(res)
 }
 
@@ -105,6 +72,6 @@ pub fn xor(x: u64, y: u64, xlen: u8, ylen: u8) -> Result<u64> {
     opcheckup(xlen, ylen)?;
     let mlen = if xlen > ylen { xlen } else { ylen };
     let res = x ^ y;
-    uflagupdate((res, false), mlen);
+    flagupdate((res, false), mlen);
     Ok(res)
 }
