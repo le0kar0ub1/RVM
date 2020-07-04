@@ -2,7 +2,7 @@
 
 A simple rust (micro-)'virtual machine'.
 
-RVM run and provide a securited run-time environnement for userspace program.
+RVM run binary and provide a securited run-time environnement for userspace programs.
 
 [root documentation](doc/root.md)
 
