@@ -1,8 +1,8 @@
 # RVM
 
-A simple rust 'virtual machine'.
+A simple rust (micro-)'virtual machine'.
 
-In fact, this is just a userspace program execution.
+RVM run and provide a securited run-time environnement for userspace program.
 
 [root documentation](doc/root.md)
 
