@@ -206,7 +206,7 @@ pub fn supervis_set_flags_register(flags: u64) {
 /*
 * Get register and returning his value
 */ 
-pub fn get64_register(reg: Register) -> Result<u64> {
+pub fn get64(reg: Register) -> Result<u64> {
     unsafe {
         match reg {
             Register::RAX => Ok(CPU.rax),
@@ -231,7 +231,7 @@ pub fn get64_register(reg: Register) -> Result<u64> {
     }
 }
 
-pub fn get32_register(reg: Register) -> Result<u32> {
+pub fn get32(reg: Register) -> Result<u32> {
     unsafe {
         match reg {
             Register::EAX => Ok(CPU.rax as u32),
@@ -256,7 +256,7 @@ pub fn get32_register(reg: Register) -> Result<u32> {
     }
 }
 
-pub fn get16_register(reg: Register) -> Result<u16> {
+pub fn get16(reg: Register) -> Result<u16> {
     unsafe {
         match reg {
             Register::AX => Ok(CPU.rax as u16),
@@ -281,7 +281,7 @@ pub fn get16_register(reg: Register) -> Result<u16> {
     }
 }
 
-pub fn get8_register(reg: Register) -> Result<u8> {
+pub fn get8(reg: Register) -> Result<u8> {
     unsafe {
         match reg {
             Register::AL => Ok(CPU.rax as u8),
@@ -314,7 +314,7 @@ pub fn get8_register(reg: Register) -> Result<u8> {
 /*
  * Set the register with given value
 */
-pub fn set64_register(reg: Register, val: u64) -> Result<()> {
+pub fn set64(reg: Register, val: u64) -> Result<()> {
     unsafe {
         match reg {
             Register::RAX => { CPU.rax = val; Ok(()) },
@@ -339,27 +339,27 @@ pub fn set64_register(reg: Register, val: u64) -> Result<()> {
     }
 }
 
-pub fn set32_register(reg: Register, val: u32) -> Result<()> {
+pub fn set32(reg: Register, val: u32) -> Result<()> {
     let reg = reg.full_register();
-    let mut set: u64 = get64_register(reg)?;
+    let mut set: u64 = get64(reg)?;
     set = ((set >> 32) << 32) | (val as u64);
-    set64_register(reg, set)?;
+    set64(reg, set)?;
     Ok(())
 }
 
-pub fn set16_register(reg: Register, val: u16) -> Result<()> {
+pub fn set16(reg: Register, val: u16) -> Result<()> {
     let reg = reg.full_register();
-    let mut set: u64 = get64_register(reg)?;
+    let mut set: u64 = get64(reg)?;
     set = ((set >> 16) << 16) | (val as u64);
-    set64_register(reg, set)?;
+    set64(reg, set)?;
     Ok(())
 }
 
-pub fn set8_register(reg: Register, val: u8) -> Result<()> {
+pub fn set8(reg: Register, val: u8) -> Result<()> {
     let reg = reg.full_register();
-    let mut set: u64 = get64_register(reg)?;
+    let mut set: u64 = get64(reg)?;
     set = ((set >> 8) << 8) | (val as u64);
-    set64_register(reg, set)?;
+    set64(reg, set)?;
     Ok(())
 }
 

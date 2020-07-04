@@ -7,20 +7,20 @@ use crate::arch::x86::shared::cpu;
 use crate::arch::x86::x86_64::syscalls::systbl;
 
 pub fn syscall_handler(_instr: Instruction) -> Result<()> {
-    let idx = cpu::get64_register(Register::RAX)?;
+    let idx = cpu::get64(Register::RAX)?;
     let ret = systbl::exec_syscall(idx as usize)?;
-    cpu::set64_register(Register::RAX, ret as u64)?;
+    cpu::set64(Register::RAX, ret as u64)?;
     Ok(())
 }
 
 pub fn obtain_arg(arg: usize) -> usize {
     match arg {
-        1 => cpu::get64_register(Register::RDI).unwrap() as usize,
-        2 => cpu::get64_register(Register::RSI).unwrap() as usize,
-        3 => cpu::get64_register(Register::RDX).unwrap() as usize,
-        4 => cpu::get64_register(Register::R10).unwrap() as usize,
-        5 => cpu::get64_register(Register::R8).unwrap() as usize,
-        6 => cpu::get64_register(Register::R9).unwrap() as usize,
+        1 => cpu::get64(Register::RDI).unwrap() as usize,
+        2 => cpu::get64(Register::RSI).unwrap() as usize,
+        3 => cpu::get64(Register::RDX).unwrap() as usize,
+        4 => cpu::get64(Register::R10).unwrap() as usize,
+        5 => cpu::get64(Register::R8).unwrap() as usize,
+        6 => cpu::get64(Register::R9).unwrap() as usize,
         _ => 0,
     }
 }

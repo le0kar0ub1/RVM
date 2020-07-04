@@ -23,8 +23,8 @@ pub fn scheduler(_img: *mut u8, ep: usize) -> Result<()> {
         let instr = decoder.decode();
         println!("{:?}", instr.code());
         arch::x86::x86_64::opcode_handler::handle_opcode(instr)?;
-        arch::x86::shared::cpu::set64_register(Register::RIP, arch::x86::shared::cpu::get64_register(Register::RIP)? + instr.next_ip() as u64)?;
-        rip = arch::x86::shared::cpu::get64_register(Register::RIP)? as usize;
+        arch::x86::shared::cpu::set64(Register::RIP, arch::x86::shared::cpu::get64(Register::RIP)? + instr.next_ip() as u64)?;
+        rip = arch::x86::shared::cpu::get64(Register::RIP)? as usize;
     }
     Ok(())
 }
