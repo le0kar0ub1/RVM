@@ -171,7 +171,7 @@ static mut CPU: Proc = Proc {
     flags : 0x0,
 };
 
-enum FlagRegister {
+pub enum FlagRegister {
     CF   = 1 << 0,
     PF   = 1 << 2,
     AF   = 1 << 4,
