@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 /*
  * A high level non-realist cheated ALU
  * Yeah, the goal is not to reproduce a computer logic
@@ -11,7 +9,9 @@ use crate::arch::x86::shared::cpu;
 fn opcheckup(xlen: u8, ylen: u8) -> Result<()> {
     if (xlen != 8 && xlen != 16 && xlen != 32 && xlen != 64) ||
     (ylen != 8 && ylen != 16 && ylen != 32 && ylen != 64) {
-        Err(anyhow!("ALU critical error: operands lenght"))
+        Err(anyhow!("ALU: unhandled operands lenght"))
+    } else if xlen < ylen {
+        Err(anyhow!("ALU: destination lenght < source"))
     } else {
         Ok(())
     }
@@ -21,7 +21,7 @@ fn flagupdate(res: (u64, bool), len: u8) {
     let mut flg = cpu::supervis_get_flags_register();
 
     flg |= match res.1 {
-        true => cpu::FlagRegister::OF as u64,
+        true => cpu::FlagRegister::OF as u64 | cpu::FlagRegister::CF as u64,
         false => 0 as u64,
     };
     flg |= match res.0 {
@@ -31,6 +31,16 @@ fn flagupdate(res: (u64, bool), len: u8) {
     flg |= match res.0 & (1 << (len - 1)) {
        0 => 0,
        _ => cpu::FlagRegister::SF as u64,
+    };
+    let mut max = 0;
+    for i in 0..=7 {
+        if (res.0 as u8) & (1 << i) == 1 {
+            max += 1;
+        }
+    }
+    flg |= match max % 2 {
+        0 => cpu::FlagRegister::PF as u64,
+        _ => 0
     };
     cpu::supervis_set_flags_register(flg);
 }

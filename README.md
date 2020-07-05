@@ -9,7 +9,6 @@ RVM run binary and provide a securited run-time environnement for userspace prog
 ## Dependencies
 
 * cargo
-* rustc
 
 ## Build
 
