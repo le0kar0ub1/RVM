@@ -15,6 +15,5 @@ Cargo.lock
 /target
 
 *.img
-sample
-strace
+sample/strace
 procimg
