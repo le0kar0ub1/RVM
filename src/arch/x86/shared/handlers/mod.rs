@@ -11,3 +11,4 @@ pub mod endbr64;
 pub mod cmp;
 pub mod jmp;
 pub mod jne;
+pub mod je;

@@ -16,4 +16,5 @@ Cargo.lock
 
 *.img
 sample/strace
+sample/s
 procimg

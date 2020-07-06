@@ -305,7 +305,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Jb => Err(anyhow!("Unhandled instruction 'Jb'")),
         Mnemonic::Jbe => Err(anyhow!("Unhandled instruction 'Jbe'")),
         Mnemonic::Jcxz => Err(anyhow!("Unhandled instruction 'Jcxz'")),
-        Mnemonic::Je => Err(anyhow!("Unhandled instruction 'Je'")),
+        Mnemonic::Je => handlers::je::je_handler(instr),
         Mnemonic::Jecxz => Err(anyhow!("Unhandled instruction 'Jecxz'")),
         Mnemonic::Jg => Err(anyhow!("Unhandled instruction 'Jg'")),
         Mnemonic::Jge => Err(anyhow!("Unhandled instruction 'Jge'")),
