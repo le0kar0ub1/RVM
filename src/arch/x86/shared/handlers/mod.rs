@@ -12,3 +12,5 @@ pub mod cmp;
 pub mod jmp;
 pub mod jne;
 pub mod je;
+pub mod inc;
+pub mod dec;

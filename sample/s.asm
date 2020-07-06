@@ -5,15 +5,14 @@ section .text
 _start:
     mov rcx, 0x4
     mov rax, wrme
-    xor BYTE [rax], 0x10
-    mov rax, 0x0
+    inc BYTE [rax]
 re:
     mov rax, 0x1
     mov rdi, 0x1
     mov rsi, wrme
     mov rdx, 0xD
     syscall
-    sub rcx, 0x1
+    dec rcx
     cmp rcx, 0x0
     jne re
 
