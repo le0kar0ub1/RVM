@@ -3,7 +3,7 @@
 use iced_x86::*;
 use anyhow::Result;
 
-use crate::arch::x86::shared::cpu;
+use crate::arch::x86::x86_64::cpu;
 use crate::arch::x86::x86_64::syscalls::systbl;
 
 pub fn syscall_handler(_instr: Instruction) -> Result<()> {

@@ -1,7 +1,7 @@
 use iced_x86::*;
 use anyhow::{Result, anyhow};
 
-use crate::arch::x86::shared::cpu;
+use crate::arch::x86::x86_64::cpu;
 
 use crate::mem::op;
 

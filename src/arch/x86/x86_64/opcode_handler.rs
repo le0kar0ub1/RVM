@@ -1,6 +1,6 @@
 use anyhow::{Result, anyhow};
 
-use crate::arch::x86::shared::handlers;
+use crate::arch::x86::x86_64::handlers;
 use crate::arch::x86::x86_64::syscalls;
 use iced_x86::*;
 

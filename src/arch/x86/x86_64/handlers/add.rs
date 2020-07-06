@@ -1,206 +1,206 @@
 use iced_x86::*;
 use anyhow::{Result, anyhow};
 
-use crate::arch::x86::shared::cpu;
+use crate::arch::x86::x86_64::cpu;
 use crate::mem::op;
-use crate::arch::x86::shared::alu;
+use crate::arch::x86::x86_64::alu;
 
-pub fn sub_handler(instr: Instruction) -> Result<()> {
+pub fn add_handler(instr: Instruction) -> Result<()> {
     match instr.code() {
-        Code::Sub_rm64_r64 => { 
+        Code::Add_rm64_r64 => { 
             if instr.memory_base() != Register::None {
                 op::safe_set64(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get64(cpu::get64(instr.memory_base())? as usize)?, cpu::get64(instr.op_register(1))?, 64, 64)? as u64)
+                    alu::add(op::safe_get64(cpu::get64(instr.memory_base())? as usize)?, cpu::get64(instr.op_register(1))?, 64, 64)? as u64)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set64(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get64(instr.memory_displacement64() as usize)?, cpu::get64(instr.op_register(1))?, 64, 64)? as u64)
+                    alu::add(op::safe_get64(instr.memory_displacement64() as usize)?, cpu::get64(instr.op_register(1))?, 64, 64)? as u64)
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0),
-                    alu::sub(cpu::get64(instr.op_register(0))? as u64, cpu::get64(instr.op_register(1))? as u64, 64, 64)? as u64)
+                    alu::add(cpu::get64(instr.op_register(0))? as u64, cpu::get64(instr.op_register(1))? as u64, 64, 64)? as u64)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_rm32_r32 => {
+        Code::Add_rm32_r32 => {
             if instr.memory_base() != Register::None {
                 op::safe_set32(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get32(cpu::get64(instr.memory_base())? as usize)? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
+                    alu::add(op::safe_get32(cpu::get64(instr.memory_base())? as usize)? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set32(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get32(instr.memory_displacement64() as usize)? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
+                    alu::add(op::safe_get32(instr.memory_displacement64() as usize)? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
             } else if instr.op_register(0) != Register::None {
                 cpu::set32(instr.op_register(0),
-                    alu::sub(cpu::get32(instr.op_register(0))? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
+                    alu::add(cpu::get32(instr.op_register(0))? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_rm16_r16 => {
+        Code::Add_rm16_r16 => {
             if instr.memory_base() != Register::None {
                 op::safe_set16(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get16(cpu::get64(instr.memory_base())? as usize)? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
+                    alu::add(op::safe_get16(cpu::get64(instr.memory_base())? as usize)? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set16(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get16(instr.memory_displacement64() as usize)? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
+                    alu::add(op::safe_get16(instr.memory_displacement64() as usize)? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
             } else if instr.op_register(0) != Register::None {
                 cpu::set16(instr.op_register(0),
-                    alu::sub(cpu::get16(instr.op_register(0))? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
+                    alu::add(cpu::get16(instr.op_register(0))? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_rm8_r8 => {
+        Code::Add_rm8_r8 => {
             if instr.memory_base() != Register::None {
                 op::safe_set8(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get8(cpu::get64(instr.memory_base())? as usize)? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
+                    alu::add(op::safe_get8(cpu::get64(instr.memory_base())? as usize)? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set8(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get8(instr.memory_displacement64() as usize)? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
+                    alu::add(op::safe_get8(instr.memory_displacement64() as usize)? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
             } else if instr.op_register(0) != Register::None {
                 cpu::set8(instr.op_register(0),
-                    alu::sub(cpu::get8(instr.op_register(0))? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
+                    alu::add(cpu::get8(instr.op_register(0))? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
 
-        Code::Sub_r64_rm64 => { 
+        Code::Add_r64_rm64 => { 
             if instr.memory_base() != Register::None {
                 cpu::set64(instr.op_register(0),
-                    alu::sub(op::safe_get64(cpu::get64(instr.memory_base())? as usize)? as u64, cpu::get64(instr.op_register(0))? as u64, 64, 64)? as u64)
+                    alu::add(op::safe_get64(cpu::get64(instr.memory_base())? as usize)? as u64, cpu::get64(instr.op_register(0))? as u64, 64, 64)? as u64)
             } else if instr.memory_displacement() != 0 {
                 cpu::set64(instr.op_register(0), 
-                    alu::sub(op::safe_get64(instr.memory_displacement64() as usize)? as u64, cpu::get64(instr.op_register(0))? as u64, 64, 64)? as u64)
+                    alu::add(op::safe_get64(instr.memory_displacement64() as usize)? as u64, cpu::get64(instr.op_register(0))? as u64, 64, 64)? as u64)
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0),
-                    alu::sub(cpu::get64(instr.op_register(0))? as u64, cpu::get64(instr.op_register(1))? as u64, 64, 64)? as u64)
+                    alu::add(cpu::get64(instr.op_register(0))? as u64, cpu::get64(instr.op_register(1))? as u64, 64, 64)? as u64)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_r32_rm32 => {
+        Code::Add_r32_rm32 => {
             if instr.memory_base() != Register::None {
                 cpu::set32(instr.op_register(0),
-                    alu::sub(op::safe_get32(cpu::get32(instr.memory_base())? as usize)? as u64, cpu::get32(instr.op_register(0))? as u64, 32, 32)? as u32)
+                    alu::add(op::safe_get32(cpu::get32(instr.memory_base())? as usize)? as u64, cpu::get32(instr.op_register(0))? as u64, 32, 32)? as u32)
             } else if instr.memory_displacement() != 0 {
                 cpu::set32(instr.op_register(0), 
-                    alu::sub(op::safe_get32(instr.memory_displacement64() as usize)? as u64, cpu::get32(instr.op_register(0))? as u64, 32, 32)? as u32)
+                    alu::add(op::safe_get32(instr.memory_displacement64() as usize)? as u64, cpu::get32(instr.op_register(0))? as u64, 32, 32)? as u32)
             } else if instr.op_register(0) != Register::None {
                 cpu::set32(instr.op_register(0),
-                    alu::sub(cpu::get32(instr.op_register(0))? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
+                    alu::add(cpu::get32(instr.op_register(0))? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_r16_rm16 => {
+        Code::Add_r16_rm16 => {
             if instr.memory_base() != Register::None {
                 cpu::set16(instr.op_register(0), 
-                    alu::sub(op::safe_get16(cpu::get16(instr.memory_base())? as usize)? as u64, cpu::get16(instr.op_register(0))? as u64, 16, 16)? as u16)
+                    alu::add(op::safe_get16(cpu::get16(instr.memory_base())? as usize)? as u64, cpu::get16(instr.op_register(0))? as u64, 16, 16)? as u16)
             } else if instr.memory_displacement() != 0 {
                 cpu::set16(instr.op_register(0), 
-                    alu::sub(op::safe_get16(instr.memory_displacement64() as usize)? as u64, cpu::get16(instr.op_register(0))? as u64, 16, 16)? as u16)
+                    alu::add(op::safe_get16(instr.memory_displacement64() as usize)? as u64, cpu::get16(instr.op_register(0))? as u64, 16, 16)? as u16)
             } else if instr.op_register(0) != Register::None {
                 cpu::set16(instr.op_register(0),
-                    alu::sub(cpu::get16(instr.op_register(0))? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
+                    alu::add(cpu::get16(instr.op_register(0))? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_r8_rm8 => {
+        Code::Add_r8_rm8 => {
             if instr.memory_base() != Register::None {
                 cpu::set8(instr.op_register(0), 
-                    alu::sub(op::safe_get8(cpu::get8(instr.memory_base())? as usize)? as u64, cpu::get8(instr.op_register(0))? as u64, 8, 8)? as u8)
+                    alu::add(op::safe_get8(cpu::get8(instr.memory_base())? as usize)? as u64, cpu::get8(instr.op_register(0))? as u64, 8, 8)? as u8)
             } else if instr.memory_displacement() != 0 {
                 cpu::set8(instr.op_register(0), 
-                    alu::sub(op::safe_get8(instr.memory_displacement64() as usize)? as u64, cpu::get8(instr.op_register(0))? as u64, 8, 8)? as u8)
+                    alu::add(op::safe_get8(instr.memory_displacement64() as usize)? as u64, cpu::get8(instr.op_register(0))? as u64, 8, 8)? as u8)
             } else if instr.op_register(0) != Register::None {
                 cpu::set8(instr.op_register(0),
-                    alu::sub(cpu::get8(instr.op_register(0))? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
+                    alu::add(cpu::get8(instr.op_register(0))? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
 
-        Code::Sub_rm64_imm8 => { 
+        Code::Add_rm64_imm8 => { 
             if instr.memory_base() != Register::None {
                 op::safe_set8(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get8(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 64, 8)? as u8)
+                    alu::add(op::safe_get8(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 64, 8)? as u8)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set8(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get8(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 64, 8)? as u8)
+                    alu::add(op::safe_get8(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 64, 8)? as u8)
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0),
-                    alu::sub(cpu::get64(instr.op_register(0))? as u64, instr.immediate(1) as u64, 64, 8)? as u64)
+                    alu::add(cpu::get64(instr.op_register(0))? as u64, instr.immediate(1) as u64, 64, 8)? as u64)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_rm32_imm8 => { 
+        Code::Add_rm32_imm8 => { 
             if instr.memory_base() != Register::None {
                 op::safe_set8(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get8(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 32, 8)? as u8)
+                    alu::add(op::safe_get8(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 32, 8)? as u8)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set8(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get8(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 32, 8)? as u8)
+                    alu::add(op::safe_get8(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 32, 8)? as u8)
             } else if instr.op_register(0) != Register::None {
                 cpu::set32(instr.op_register(0),
-                    alu::sub(cpu::get32(instr.op_register(0))? as u64, instr.immediate(1) as u64, 32, 8)? as u32)
+                    alu::add(cpu::get32(instr.op_register(0))? as u64, instr.immediate(1) as u64, 32, 8)? as u32)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_rm64_imm32 => { 
+        Code::Add_rm64_imm32 => { 
             if instr.memory_base() != Register::None {
                 op::safe_set32(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get32(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 64, 32)? as u32)
+                    alu::add(op::safe_get32(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 64, 32)? as u32)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set32(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get32(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 64, 32)? as u32)
+                    alu::add(op::safe_get32(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 64, 32)? as u32)
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0),
-                    alu::sub(cpu::get64(instr.op_register(0))? as u64, instr.immediate(1) as u64, 64, 32)? as u64)
+                    alu::add(cpu::get64(instr.op_register(0))? as u64, instr.immediate(1) as u64, 64, 32)? as u64)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_rm32_imm32 => { 
+        Code::Add_rm32_imm32 => { 
             if instr.memory_base() != Register::None {
                 op::safe_set32(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get32(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 32, 32)? as u32)
+                    alu::add(op::safe_get32(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 32, 32)? as u32)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set32(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get32(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 32, 32)? as u32)
+                    alu::add(op::safe_get32(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 32, 32)? as u32)
             } else if instr.op_register(0) != Register::None {
                 cpu::set32(instr.op_register(0),
-                    alu::sub(cpu::get32(instr.op_register(0))? as u64, instr.immediate(1) as u64, 32, 32)? as u32)
+                    alu::add(cpu::get32(instr.op_register(0))? as u64, instr.immediate(1) as u64, 32, 32)? as u32)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_rm16_imm16 => { 
+        Code::Add_rm16_imm16 => { 
             if instr.memory_base() != Register::None {
                 op::safe_set16(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get16(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 16, 16)? as u16)
+                    alu::add(op::safe_get16(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 16, 16)? as u16)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set16(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get16(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 16, 16)? as u16)
+                    alu::add(op::safe_get16(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 16, 16)? as u16)
             } else if instr.op_register(0) != Register::None {
                 cpu::set16(instr.op_register(0),
-                    alu::sub(cpu::get16(instr.op_register(0))? as u64, instr.immediate(1) as u64, 16, 15)? as u16)
+                    alu::add(cpu::get16(instr.op_register(0))? as u64, instr.immediate(1) as u64, 16, 15)? as u16)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }
         }
-        Code::Sub_rm8_imm8 => { 
+        Code::Add_rm8_imm8 => { 
             if instr.memory_base() != Register::None {
                 op::safe_set8(cpu::get64(instr.memory_base())? as usize,
-                    alu::sub(op::safe_get8(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 8, 8)? as u8)
+                    alu::add(op::safe_get8(cpu::get64(instr.memory_base())? as usize)? as u64, instr.immediate(1) as u64, 8, 8)? as u8)
             } else if instr.memory_displacement() != 0 {
                 op::safe_set8(instr.memory_displacement64() as usize,
-                    alu::sub(op::safe_get8(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 8, 8)? as u8)
+                    alu::add(op::safe_get8(instr.memory_displacement64() as usize)? as u64, instr.immediate(1) as u64, 8, 8)? as u8)
             } else if instr.op_register(0) != Register::None {
                 cpu::set8(instr.op_register(0),
-                    alu::sub(cpu::get8(instr.op_register(0))? as u64, instr.immediate(1) as u64, 8, 8)? as u8)
+                    alu::add(cpu::get8(instr.op_register(0))? as u64, instr.immediate(1) as u64, 8, 8)? as u8)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }

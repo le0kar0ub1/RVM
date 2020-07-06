@@ -4,7 +4,7 @@
 */
 use anyhow::{Result, anyhow};
 
-use crate::arch::x86::shared::cpu;
+use crate::arch::x86::x86_64::cpu;
 
 fn opcheckup(xlen: u8, ylen: u8) -> Result<()> {
     if (xlen != 8 && xlen != 16 && xlen != 32 && xlen != 64) ||
