@@ -5,6 +5,9 @@ use crate as root;
 use crate::arch::x86;
 use crate::mem;
 
+/*
+ * Main loop
+*/
 pub fn scheduler(_img: *mut u8, ep: usize) -> Result<()> {
     let xseg = mem::mem::segment_get(ep)?;
     let mut rip = ep;

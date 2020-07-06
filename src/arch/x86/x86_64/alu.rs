@@ -6,6 +6,9 @@ use anyhow::{Result, anyhow};
 
 use crate::arch::x86::x86_64::cpu;
 
+/*
+ * checl if the given operation is valid
+*/
 fn opcheckup(xlen: u8, ylen: u8) -> Result<()> {
     if (xlen != 8 && xlen != 16 && xlen != 32 && xlen != 64) ||
     (ylen != 8 && ylen != 16 && ylen != 32 && ylen != 64) {
@@ -17,6 +20,9 @@ fn opcheckup(xlen: u8, ylen: u8) -> Result<()> {
     }
 }
 
+/*
+ * Update CPU flag
+*/
 fn flagupdate(res: (u64, bool), len: u8) {
     let mut flg = cpu::supervis_get_flags_register();
 

@@ -4,6 +4,9 @@ use crate::arch::x86::x86_64::handlers;
 use crate::arch::x86::x86_64::syscalls;
 use iced_x86::*;
 
+/*
+ * Call the good handler from the given opcode
+*/
 pub fn handle_opcode(instr: Instruction) -> Result<()> {
     match instr.mnemonic() {
         Mnemonic::Aam => Err(anyhow!("Unhandled instruction 'Aam'")),
