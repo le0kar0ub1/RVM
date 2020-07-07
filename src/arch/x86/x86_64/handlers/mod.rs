@@ -16,3 +16,4 @@ pub mod inc;
 pub mod dec;
 pub mod lea;
 pub mod call;
+pub mod ret;
