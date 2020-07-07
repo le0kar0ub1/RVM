@@ -155,11 +155,11 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
         }
         Code::Mov_r32_imm32 => { 
             if instr.memory_base() != Register::None {
-                cpu::set32(instr.op_register(0), instr.immediate(1) as u32)
+                cpu::set64(instr.op_register(0).full_register(), instr.immediate(1) as u64)
             } else if instr.memory_displacement() != 0 {
-                cpu::set32(instr.op_register(0), instr.immediate(1) as u32)
+                cpu::set64(instr.op_register(0).full_register(), instr.immediate(1) as u64)
             } else if instr.op_register(0) != Register::None {
-                cpu::set32(instr.op_register(0), instr.immediate(1) as u32)
+                cpu::set64(instr.op_register(0).full_register(), instr.immediate(1) as u64)
             } else {
                 Err(anyhow!("Invalid opcode"))
             }

@@ -14,3 +14,4 @@ pub mod jne;
 pub mod je;
 pub mod inc;
 pub mod dec;
+pub mod lea;

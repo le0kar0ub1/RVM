@@ -380,7 +380,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Lddqu => Err(anyhow!("Unhandled instruction 'Lddqu'")),
         Mnemonic::Ldmxcsr => Err(anyhow!("Unhandled instruction 'Ldmxcsr'")),
         Mnemonic::Lds => Err(anyhow!("Unhandled instruction 'Lds'")),
-        Mnemonic::Lea => Err(anyhow!("Unhandled instruction 'Lea'")),
+        Mnemonic::Lea => handlers::lea::lea_handler(instr),
         Mnemonic::Leave => Err(anyhow!("Unhandled instruction 'Leave'")),
         Mnemonic::Les => Err(anyhow!("Unhandled instruction 'Les'")),
         Mnemonic::Lfence => Err(anyhow!("Unhandled instruction 'Lfence'")),
