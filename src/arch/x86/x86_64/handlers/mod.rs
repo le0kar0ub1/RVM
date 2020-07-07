@@ -15,3 +15,4 @@ pub mod je;
 pub mod inc;
 pub mod dec;
 pub mod lea;
+pub mod call;

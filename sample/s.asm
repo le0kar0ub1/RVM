@@ -2,10 +2,15 @@ global _start
 
 section .text
 
+called:
+    ret
+
 _start:
     mov rcx, 0x4
     lea rax, [wrme]
     inc BYTE [rax]
+    mov rax, called
+    call rax
 re:
     mov rax, 0x1
     mov rdi, 0x1

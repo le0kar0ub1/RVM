@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow};
 use iced_x86::*;
 
 use crate as root;
-use crate::arch::x86;
+use crate::arch::x86::x86_64;
 use crate::mem;
 
 /*
@@ -24,15 +24,15 @@ pub fn scheduler(_img: *mut u8, ep: usize) -> Result<()> {
         };
         let mut decoder = iced_x86::Decoder::new(64, &buffered, DecoderOptions::NONE);
         let instr = decoder.decode();
-        x86::x86_64::opcode_handler::handle_opcode(instr)?;
-        x86::x86_64::cpu::set64(Register::RIP, x86::x86_64::cpu::get64(Register::RIP)? + instr.next_ip() as u64)?;
-        rip = x86::x86_64::cpu::get64(Register::RIP)? as usize;
+        x86_64::opcode_handler::handle_opcode(instr)?;
+        x86_64::cpu::set64(Register::RIP, x86_64::cpu::get64(Register::RIP)? + instr.next_ip() as u64)?;
+        rip = x86_64::cpu::get64(Register::RIP)? as usize;
     }
     Ok(())
 }
 
 pub fn init(img: *mut u8, ep: usize) -> Result<()> {
-    x86::x86_64::cpu::init(mem::mem::stack_get().get_addr() as u64, ep as u64);
+    x86_64::cpu::init(mem::mem::stack_get().get_addr() as u64, ep as u64);
     scheduler(img, ep)?;
     Ok(())
 }
