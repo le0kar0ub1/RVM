@@ -17,7 +17,7 @@ pub fn inc_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set8(instr.op_register(0), alu::add(cpu::get8(instr.op_register(0))? as u64, 1 as u64, 8, 8)? as u8)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Inc_rm16 => {
@@ -26,7 +26,7 @@ pub fn inc_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set16(instr.op_register(0), alu::add(cpu::get16(instr.op_register(0))? as u64, 1 as u64, 16, 16)? as u16)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Inc_rm32 => {
@@ -35,7 +35,7 @@ pub fn inc_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set32(instr.op_register(0), alu::add(cpu::get32(instr.op_register(0))? as u64, 1 as u64, 32, 32)? as u32)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Inc_rm64 => {
@@ -44,10 +44,10 @@ pub fn inc_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0), alu::add(cpu::get64(instr.op_register(0))? as u64, 1 as u64, 64, 64)? as u64)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
-        _ => Err(anyhow!("Invalid opcode"))
+        _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
     }?;
     Ok(())
 }

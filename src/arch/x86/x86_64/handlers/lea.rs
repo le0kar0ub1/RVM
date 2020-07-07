@@ -9,7 +9,7 @@ pub fn lea_handler(instr: Instruction) -> Result<()> {
         Code::Lea_r64_m => {
             cpu::set64(instr.op_register(0), mem::iftranslation(instr.memory_displacement64() as usize) as u64)
         },
-        _ => Err(anyhow!("Invalid opcode")),
+        _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
     }?;
     Ok(())
 }

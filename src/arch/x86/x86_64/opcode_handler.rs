@@ -1553,7 +1553,7 @@ pub fn handle_opcode(instr: Instruction) -> Result<()> {
         Mnemonic::Xresldtrk => Err(anyhow!("Unhandled instruction 'Xresldtrk'")),
         Mnemonic::Invlpgb => Err(anyhow!("Unhandled instruction 'Invlpgb'")),
         Mnemonic::Tlbsync => Err(anyhow!("Unhandled instruction 'Tlbsync'")),
-        Mnemonic::INVALID => Err(anyhow!("Invalid opcode")),
-        _ => Err(anyhow!("Invalid opcode")),
+        Mnemonic::INVALID => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
+        _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
     }
 }

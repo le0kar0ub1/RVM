@@ -15,7 +15,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get8(instr.op_register(0))? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         },
         Code::Cmp_r16_rm16 => {
@@ -26,7 +26,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get16(instr.op_register(0))? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Cmp_r32_rm32 => {
@@ -37,7 +37,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get32(instr.op_register(0))? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Cmp_r64_rm64 => {
@@ -48,7 +48,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get64(instr.op_register(0))?, cpu::get64(instr.op_register(1))? as u64, 64, 64])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 
@@ -60,7 +60,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get8(instr.op_register(0))? as u64, instr.immediate(1) as u64, 8, 8])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 
@@ -72,7 +72,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get16(instr.op_register(0))? as u64, instr.immediate(1) as u64, 16, 8])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Cmp_rm16_imm16 => {
@@ -83,7 +83,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get16(instr.op_register(0))? as u64, instr.immediate(1) as u64, 16, 16])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 
@@ -95,7 +95,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get32(instr.op_register(0))? as u64, instr.immediate(1) as u64, 32, 8])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Cmp_rm32_imm32 => {
@@ -106,7 +106,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get32(instr.op_register(0))? as u64, instr.immediate(1) as u64, 32, 32])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 
@@ -118,7 +118,7 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get64(instr.op_register(0))? as u64, instr.immediate(1) as u64, 64, 8])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Cmp_rm64_imm32 => {
@@ -129,10 +129,10 @@ pub fn cmp_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 Ok([cpu::get64(instr.op_register(0))? as u64, instr.immediate(1) as u64, 64, 32])
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
-        _ => Err(anyhow!("Invalid opcode"))
+        _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
     }?;
     alu::sub(cmp[0], cmp[1], cmp[2] as u8, cmp[3] as u8)?;
     Ok(())

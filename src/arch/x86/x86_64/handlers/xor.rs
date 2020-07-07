@@ -18,7 +18,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set64(instr.op_register(0),
                     alu::xor(cpu::get64(instr.op_register(0))? as u64, cpu::get64(instr.op_register(1))? as u64, 64, 64)? as u64)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_rm32_r32 => {
@@ -32,7 +32,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set32(instr.op_register(0),
                     alu::xor(cpu::get32(instr.op_register(0))? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_rm16_r16 => {
@@ -46,7 +46,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set16(instr.op_register(0),
                     alu::xor(cpu::get16(instr.op_register(0))? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_rm8_r8 => {
@@ -60,7 +60,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set8(instr.op_register(0),
                     alu::xor(cpu::get8(instr.op_register(0))? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 
@@ -75,7 +75,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set64(instr.op_register(0),
                     alu::xor(cpu::get64(instr.op_register(0))? as u64, cpu::get64(instr.op_register(1))? as u64, 64, 64)? as u64)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_r32_rm32 => {
@@ -89,7 +89,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set32(instr.op_register(0),
                     alu::xor(cpu::get32(instr.op_register(0))? as u64, cpu::get32(instr.op_register(1))? as u64, 32, 32)? as u32)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_r16_rm16 => {
@@ -103,7 +103,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set16(instr.op_register(0),
                     alu::xor(cpu::get16(instr.op_register(0))? as u64, cpu::get16(instr.op_register(1))? as u64, 16, 16)? as u16)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_r8_rm8 => {
@@ -117,7 +117,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set8(instr.op_register(0),
                     alu::xor(cpu::get8(instr.op_register(0))? as u64, cpu::get8(instr.op_register(1))? as u64, 8, 8)? as u8)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 
@@ -132,7 +132,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set64(instr.op_register(0),
                     alu::xor(cpu::get64(instr.op_register(0))? as u64, instr.immediate(1) as u64, 64, 8)? as u64)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_rm32_imm8 => { 
@@ -146,7 +146,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set32(instr.op_register(0),
                     alu::xor(cpu::get32(instr.op_register(0))? as u64, instr.immediate(1) as u64, 32, 8)? as u32)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_rm64_imm32 => { 
@@ -160,7 +160,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set64(instr.op_register(0),
                     alu::xor(cpu::get64(instr.op_register(0))? as u64, instr.immediate(1) as u64, 64, 32)? as u64)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_rm32_imm32 => { 
@@ -174,7 +174,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set32(instr.op_register(0),
                     alu::xor(cpu::get32(instr.op_register(0))? as u64, instr.immediate(1) as u64, 32, 32)? as u32)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_rm16_imm16 => { 
@@ -188,7 +188,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set16(instr.op_register(0),
                     alu::xor(cpu::get16(instr.op_register(0))? as u64, instr.immediate(1) as u64, 16, 15)? as u16)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Xor_rm8_imm8 => { 
@@ -202,7 +202,7 @@ pub fn xor_handler(instr: Instruction) -> Result<()> {
                 cpu::set8(instr.op_register(0),
                     alu::xor(cpu::get8(instr.op_register(0))? as u64, instr.immediate(1) as u64, 8, 8)? as u8)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr))),

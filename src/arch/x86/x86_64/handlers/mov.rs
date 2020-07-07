@@ -15,7 +15,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0), cpu::get64(instr.op_register(1))?)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_rm32_r32 => { 
@@ -26,7 +26,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set32(instr.op_register(0), cpu::get32(instr.op_register(1))?)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_rm16_r16 => { 
@@ -37,7 +37,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set16(instr.op_register(0), cpu::get16(instr.op_register(1))?)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_rm8_r8   => { 
@@ -48,7 +48,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set8(instr.op_register(0), cpu::get8(instr.op_register(1))?)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 
@@ -60,7 +60,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0), cpu::get64(instr.op_register(1))?)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_r32_rm32 => { 
@@ -71,7 +71,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set32(instr.op_register(0), cpu::get32(instr.op_register(1))?)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_r16_rm16 => { 
@@ -82,7 +82,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set16(instr.op_register(0), cpu::get16(instr.op_register(1))?)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_r8_rm8   => { 
@@ -93,7 +93,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set8(instr.op_register(0), cpu::get8(instr.op_register(1))?)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 
@@ -105,7 +105,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0), instr.immediate(1) as u64)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_rm32_imm32 => { 
@@ -116,7 +116,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set32(instr.op_register(0), instr.immediate(1) as u32)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_rm16_imm16 => { 
@@ -127,7 +127,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set16(instr.op_register(0), instr.immediate(1) as u16)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_rm8_imm8   => { 
@@ -138,7 +138,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set8(instr.op_register(0), instr.immediate(0) as u8)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 
@@ -150,7 +150,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0), instr.immediate(1) as u64)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_r32_imm32 => { 
@@ -161,7 +161,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set64(instr.op_register(0).full_register(), instr.immediate(1) as u64)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_r16_imm16 => { 
@@ -172,7 +172,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set16(instr.op_register(0), instr.immediate(1) as u16)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
         Code::Mov_r8_imm8   => { 
@@ -183,7 +183,7 @@ pub fn mov_handler(instr: Instruction) -> Result<()> {
             } else if instr.op_register(0) != Register::None {
                 cpu::set8(instr.op_register(0), instr.immediate(1) as u8)
             } else {
-                Err(anyhow!("Invalid opcode"))
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
             }
         }
 

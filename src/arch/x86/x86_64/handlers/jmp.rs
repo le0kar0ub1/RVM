@@ -20,7 +20,7 @@ pub fn jmp_handler(instr: Instruction) -> Result<()> {
         Code::Jmp_rel32_64 | Code::Jmp_rel8_64 => {
             cpu::set64(Register::RIP, (cpu::get64(Register::RIP)? as i64 + instr.memory_address64() as i64 - selfsz as i64) as u64)
         }
-        _ => Err(anyhow!("Invalid opcode")),
+        _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
     }?;
     Ok(())
 }
