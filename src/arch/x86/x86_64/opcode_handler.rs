@@ -8,6 +8,7 @@ use iced_x86::*;
  * Call the good handler from the given opcode
 */
 pub fn handle_opcode(instr: Instruction) -> Result<()> {
+    // println!("{:?}", instr.code());
     match instr.mnemonic() {
         Mnemonic::Aam => Err(anyhow!("Unhandled instruction 'Aam'")),
         Mnemonic::Aas => Err(anyhow!("Unhandled instruction 'Aas'")),

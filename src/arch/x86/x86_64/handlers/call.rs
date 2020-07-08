@@ -13,7 +13,13 @@ pub fn call_handler(instr: Instruction) -> Result<()> {
             cpu::set64(Register::RIP, (cpu::get64(Register::RIP)? as i64 + instr.memory_address64() as i64) as u64 - selfsz)
         }
         Code::Call_rm64 => {
-            cpu::set64(Register::RIP, mem::is_segment_executable((cpu::get64(instr.op_register(0))?) as usize, 1 as usize)? as u64 - selfsz)
+            if instr.op_register(0) != Register::None {
+                cpu::set64(Register::RIP, mem::is_segment_executable((cpu::get64(instr.op_register(0))?) as usize, 1 as usize)? as u64 - selfsz)
+            } else if instr.memory_base() != Register::None {
+                cpu::set64(Register::RIP, mem::is_segment_executable((cpu::get64(instr.memory_base())? as i64 + instr.memory_displacement64() as i64) as usize, 1 as usize)? as u64 - selfsz)
+            } else {
+                Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr)))
+            }
         }
         _ => Err(anyhow!(format!("Invalid operand/format:\n{:?}", instr))),
     }?;
