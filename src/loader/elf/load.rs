@@ -9,7 +9,6 @@
 extern crate libc;
 extern crate goblin;
 
-// use crate::arch;
 use crate::mem;
 
 use std::io::prelude::*;
@@ -18,7 +17,6 @@ use std::fs::File;
 use anyhow::{Context, Result, anyhow};
 
 const DYNAMIC_LIBRARY_PATH_LINUX: &str = "/usr/lib/";
-
 const PROC_IMG_PATH: &str = "./procimg";
 
 #[derive(Debug)]
@@ -27,6 +25,8 @@ pub struct ElfImg {
     pub img: *mut u8,
     pub imgsz: usize,
     buf: Vec<u8>,
+    arch: u16,
+    segs: Vec<mem::comp::segments::Segment>,
 }
 
 #[derive(Debug)]
@@ -56,12 +56,11 @@ impl ElfImg {
         let path = std::path::Path::new(file);
         let buf = std::fs::read(path).with_context(|| format!("Failed to read the given path: {:?}", path))?;
         let binobj = goblin::elf::Elf::parse(&buf).with_context(|| format!("Invalid ELF format: {:?}", path))?;
-        match binobj.header.e_machine {
-            goblin::elf::header::EM_X86_64 => (),
-            goblin::elf::header::EM_386 => (),
-            goblin::elf::header::EM_AARCH64 => (),
-            _ => return Err(anyhow!("Invalid target architecture")),
-        }
+        let arch = binobj.header.e_machine;
+        match arch {
+            goblin::elf::header::EM_X86_64 => Ok(()),
+            _ => Err(anyhow!(format!("Invalid target architecture {:?}", arch))),
+        }?;
         /*
          * Just init with a first alloc
         */
@@ -72,12 +71,13 @@ impl ElfImg {
             }
             ptr
         };
-        // log!("parser initialized");
-        Ok (ElfImg {
+        Ok(ElfImg {
             file: file.clone(),
             img: ptr,
             imgsz: 0x100,
             buf: buf,
+            segs: Vec::new(),
+            arch: arch,
         })
     }
 
@@ -224,9 +224,19 @@ impl ElfImg {
         unsafe {
             libc::memcpy(self.img.wrapping_add(load) as *mut libc::c_void, buf.as_ptr() as *const libc::c_void, buf.len());
         }
-        // log!(format!("Loading SO {} at offset {:#X}", sop, load));
         /* resolve relocations */
         self.load_resolve_relocs(&soobj, dynsymvec, dynsymname, load)?;
+        /* load so segments */
+        for phdr in soobj.program_headers {
+            let flags: mem::comp::segments::SegmentFlag = match phdr.p_flags {
+                0x4 => mem::comp::segments::SegmentFlag::R,
+                0x5 => mem::comp::segments::SegmentFlag::RX,
+                0x6 => mem::comp::segments::SegmentFlag::RW,
+                0x7 => mem::comp::segments::SegmentFlag::RWX,
+                _   => mem::comp::segments::SegmentFlag::Nop,
+            };
+            self.segs.push(mem::comp::segments::Segment::new(phdr.p_vaddr as usize + load, phdr.p_filesz as usize, flags));
+        }
         Ok(load)
     }
 
@@ -280,6 +290,31 @@ impl ElfImg {
     }
 
     /*
+     * load Image segments 
+    */
+    fn load_primary_segments(&mut self, binobj: &goblin::elf::Elf) -> Result<()> {
+        for phdr in &binobj.program_headers {
+            let flags: mem::comp::segments::SegmentFlag = match phdr.p_flags {
+                0x4 => mem::comp::segments::SegmentFlag::R,
+                0x5 => mem::comp::segments::SegmentFlag::RX,
+                0x6 => mem::comp::segments::SegmentFlag::RW,
+                0x7 => mem::comp::segments::SegmentFlag::RWX,
+                _   => mem::comp::segments::SegmentFlag::Nop,
+            };
+            self.segs.push(mem::comp::segments::Segment::new(phdr.p_vaddr as usize, phdr.p_filesz as usize, flags));
+        }
+        Ok(())
+    }
+
+    fn update_segs(&mut self) -> Result<()> {
+        for seg in &mut self.segs {
+            seg.addr = seg.addr + self.img as usize;
+        }
+        mem::mem::init(0x100000, self.segs.clone(), self.img as usize, 0, self.imgsz as usize)?;
+        Ok(())
+    }
+
+    /*
      * from binary to image then return the entry point
     */
     pub fn load(&mut self) -> Result<usize> {
@@ -287,36 +322,11 @@ impl ElfImg {
         let binobj = goblin::elf::Elf::parse(bufcp)?;
         self.load_static_hdrs(&binobj)?;
         self.load_sections(&binobj)?;
+        self.load_primary_segments(&binobj)?;
         self.load_resolve_dynamic(&binobj)?;
         self.dump_image()?;
-        // log!(format!("Process image loaded: size -> {:#X} | addr -> {:#X}", self.imgsz, self.img as usize));
+        self.update_segs()?;
         Ok(self.img as usize + binobj.header.e_entry as usize)
     }
 
-    /*
-     * Get Image segments 
-    */
-    pub fn load_segments(&mut self) -> Result<Vec<mem::comp::segments::Segment>> {
-        let mut segs: Vec<mem::comp::segments::Segment> = Vec::new();
-        let binobj = goblin::elf::Elf::parse(&self.buf)?;
-        for phdr in binobj.program_headers {
-            let flags: mem::comp::segments::SegmentFlag = match phdr.p_flags {
-                0x4 => mem::comp::segments::SegmentFlag::R,
-                0x5 => mem::comp::segments::SegmentFlag::RX,
-                0x6 => mem::comp::segments::SegmentFlag::RW,
-                0x7 => mem::comp::segments::SegmentFlag::RWX,
-                _ => mem::comp::segments::SegmentFlag::Nop,
-            };
-            segs.push(mem::comp::segments::Segment::new(phdr.p_vaddr as usize + self.img as usize, phdr.p_filesz as usize, flags));
-        }
-        Ok(segs)
-    }
-
-    /*
-     * Get arch
-    */
-    pub fn load_get_arch(&self) -> Result<u16> {
-        let binobj = goblin::elf::Elf::parse(&self.buf)?;
-        Ok(binobj.header.e_machine)
-    }
 }
