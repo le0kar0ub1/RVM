@@ -11,10 +11,10 @@ pub fn jmp_handler(instr: Instruction) -> Result<()> {
     match instr.code() {
         Code::Jmp_rm64 => match instr.op_register(0) {
             Register::None => cpu::set64(Register::RIP, op::safe_get64(instr.memory_address64() as usize)? as u64 - selfsz),
-            _ => cpu::set64(Register::RIP, mem::iftranslation(cpu::get64(instr.op_register(0))? as usize) as u64 - selfsz),
+            _ => cpu::set64(Register::RIP, mem::tovirt(cpu::get64(instr.op_register(0))? as usize) as u64 - selfsz),
         }
         Code::Jmp_ptr1616 | Code::Jmp_ptr1632 =>
-            cpu::set64(Register::RIP, mem::iftranslation(instr.memory_address64() as usize) as u64 - selfsz),
+            cpu::set64(Register::RIP, mem::tovirt(instr.memory_address64() as usize) as u64 - selfsz),
         Code::Jmp_m1664 | Code::Jmp_m1632 | Code::Jmp_m1616 =>
             cpu::set64(Register::RIP, op::safe_get64(instr.memory_address64() as usize)? as u64 - selfsz),
         Code::Jmp_rel32_64 | Code::Jmp_rel8_64 => {

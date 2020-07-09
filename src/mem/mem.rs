@@ -131,11 +131,11 @@ fn check_mmap_supervis(addr: usize, size: usize, flg: comp::segments::SegmentFla
             }
         }
     }
-    Err(anyhow!(format!("Operation {:?} on address {:#X} not mapped/flagged", flg, addr)))
+    Err(anyhow!(format!("Operation {:?} on address {:#X} not mapped/flagged (bin: {:#X})", flg, addr, tophys(addr))))
 }
 
 pub fn is_segment_valid(addr: usize, size: usize, seg: comp::segments::SegmentFlag) -> Result<usize> {
-    let addr = iftranslation(addr);
+    let addr = tovirt(addr);
     check_mmap_supervis(addr, size, seg)?;
     Ok(addr)
 }
@@ -155,10 +155,20 @@ pub fn is_segment_readable(addr: usize, size: usize) -> Result<usize> {
     Ok(addr)
 }
 
-pub fn iftranslation(addr: usize) -> usize {
+pub fn tovirt(addr: usize) -> usize {
     unsafe {
         if addr >= STATIC_MEM.binlow && addr <= STATIC_MEM.binhigh {
             addr + STATIC_MEM.trans
+        } else {
+            addr
+        }
+    }
+}
+
+pub fn tophys(addr: usize) -> usize {
+    unsafe {
+        if addr >= STATIC_MEM.imglow && addr <= STATIC_MEM.imghigh {
+            addr - STATIC_MEM.trans
         } else {
             addr
         }
