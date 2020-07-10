@@ -38,7 +38,7 @@ Scoped architecture: `x86_64`
 
 Juste a sample of x64 assembly code ot test the VM.
 
-```x86asm
+```assembly
 global _start
 
 section .text
@@ -78,7 +78,7 @@ section .data
    metoo DB 'called routine', 0xA
 ```
 
-```sh
+```shell
 sample/asm.sh sampe/s
 cargo run sample/s
 ```
