@@ -79,8 +79,8 @@ section .data
 ```
 
 ```shell
-sample/asm.sh sampe/s
-cargo run sample/s
+[anywhere/RVM]$ sample/asm.sh sampe/s
+[anywhere/RVM]$ cargo run sample/s
 ```
 
 Then the given output:
