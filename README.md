@@ -2,7 +2,7 @@
 
 A simple rust (micro-)'virtual machine'.
 
-RVM run binary and provide a securited run-time environnement for userspace programs.
+RVM run binary and provide a securited run-time environment for userspace programs.
 
 [root documentation](doc/root.md)
 
@@ -36,7 +36,7 @@ Scoped architecture: `x86_64`
 
 ## Sample
 
-Juste a sample of x64 assembly code ot test the VM.
+Juste a sample of x64 assembly code to test the VM.
 
 ```assembly
 global _start
